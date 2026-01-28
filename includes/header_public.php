@@ -51,7 +51,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <nav class="main-nav">
                 <ul class="navbar-nav">
                     <li><a class="nav-link active" href="index.php">INICIO</a></li>
-                    <li><a class="nav-link" href="pages/public/productos.php">PRODUCTOS</a></li>
+                    <li><a class="nav-link" href="modules/public/productos.php">PRODUCTOS</a></li>
                     <li><a class="nav-link" href="#nosotros">NOSOTROS</a></li>
                 </ul>
             </nav>
