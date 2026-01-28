@@ -30,12 +30,15 @@ if (!$userInfo) {
 // Obtener datos del usuario
 $userName = getCurrentUserName();
 $userRole = getCurrentUserRole();
-$empleado_id = $_SESSION['empleado_id'] ?? null;
-$local_codigo = $_SESSION['local_codigo'] ?? null;
+
+// USAR LOS MISMOS NOMBRES QUE EL LOGIN
+$empleado_id = $_SESSION['id_empleado'] ?? null;  // Cambiado de 'empleado_id' a 'id_empleado'
+$local_codigo = $_SESSION['codigo_local'] ?? null; // Cambiado de 'local_codigo' a 'codigo_local'
 
 // Obtener conexión a la base de datos
 $db = Database::getConnection();
 
+// En modules/empleado/dashboard.php, actualiza la consulta de empleado:
 try {
     // Obtener información detallada del empleado
     $stmt = $db->prepare("
@@ -46,6 +49,7 @@ try {
             l.ciudad, 
             l.provincia,
             l.telefono as telefono_local,
+            l.codigo_local,
             f.nombres as franquiciado_nombres,
             f.apellidos as franquiciado_apellidos
         FROM empleados e
@@ -55,6 +59,17 @@ try {
     ");
     $stmt->execute([$empleado_id]);
     $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Asegurar que local_codigo esté definido
+    if (!$local_codigo && isset($empleado['codigo_local'])) {
+        $local_codigo = $empleado['codigo_local'];
+        $_SESSION['local_codigo'] = $local_codigo;
+    }
+    
+    // Si no hay local_codigo, mostrar error
+    if (!$local_codigo) {
+        throw new Exception("No se encontró el código del local asignado");
+    }
     
     // Obtener estadísticas del día
     $stmt = $db->prepare("
@@ -1080,27 +1095,6 @@ require_once __DIR__ . '/../../includes/header.php';
                 turnoElement.classList.add('text-muted');
                 turnoElement.innerHTML += '<br><small class="badge bg-secondary">FINALIZADO</small>';
             }
-        }
-    });
-
-    /**
-     * Navegación rápida con teclas
-     */
-    document.addEventListener('keydown', function(e) {
-        // Alt + V: Nueva venta
-        if (e.altKey && e.key === 'v') {
-            e.preventDefault();
-            window.location.href = 'ventas.php';
-        }
-        // Alt + I: Inventario
-        if (e.altKey && e.key === 'i') {
-            e.preventDefault();
-            window.location.href = 'inventario.php';
-        }
-        // Alt + C: Clientes
-        if (e.altKey && e.key === 'c') {
-            e.preventDefault();
-            window.location.href = 'clientes.php';
         }
     });
 

@@ -70,15 +70,15 @@ $user_role = strtolower(trim($user_role));
     <link rel="icon" href="<?php echo BASE_URL; ?>imagenes/favicon.ico" type="image/x-icon">
 
     <!-- Estilos adicionales de página -->
-    <?php if (!empty($pageStyles)): ?>
-        <?php foreach ($pageStyles as $style): ?>
+    <?php if (!empty($modulestyles)): ?>
+        <?php foreach ($modulestyles as $style): ?>
             <link rel="stylesheet" href="<?php echo BASE_URL . 'css/' . $style; ?>">
         <?php endforeach; ?>
     <?php endif; ?>
 
     <!-- Scripts adicionales de página (cargados en <head> si es necesario) -->
-    <?php if (!empty($pageScripts)): ?>
-        <?php foreach ($pageScripts as $script): ?>
+    <?php if (!empty($modulescripts)): ?>
+        <?php foreach ($modulescripts as $script): ?>
             <?php if (strpos($script, 'http') === 0): ?>
                 <script src="<?php echo $script; ?>"></script>
             <?php else: ?>
@@ -172,8 +172,8 @@ $user_role = strtolower(trim($user_role));
                                 <li>
                                     <h6 class="dropdown-header text-warning">Mi Negocio</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/locales.php"><i class="fas fa-store-alt me-2"></i>Mis Locales</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/ventas.php"><i class="fas fa-chart-line me-2"></i>Ventas</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/locales.php"><i class="fas fa-store-alt me-2"></i>Mis Locales</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/ventas.php"><i class="fas fa-chart-line me-2"></i>Ventas</a></li>
 
                                 <li>
                                     <hr class="dropdown-divider">
@@ -182,8 +182,8 @@ $user_role = strtolower(trim($user_role));
                                 <li>
                                     <h6 class="dropdown-header text-warning">Administración</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/contratos.php"><i class="fas fa-file-signature me-2"></i>Contratos</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/pagos.php"><i class="fas fa-credit-card me-2"></i>Pagos</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/contratos.php"><i class="fas fa-file-signature me-2"></i>Contratos</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/pagos.php"><i class="fas fa-credit-card me-2"></i>Pagos</a></li>
 
                                 <li>
                                     <hr class="dropdown-divider">
@@ -192,7 +192,7 @@ $user_role = strtolower(trim($user_role));
                                 <li>
                                     <h6 class="dropdown-header text-warning">Personal</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/empleados.php"><i class="fas fa-users me-2"></i>Empleados</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/empleados.php"><i class="fas fa-users me-2"></i>Empleados</a></li>
                             </ul>
                         </li>
 
@@ -209,8 +209,8 @@ $user_role = strtolower(trim($user_role));
                                 <li>
                                     <h6 class="dropdown-header text-warning">Operación</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/ventas.php"><i class="fas fa-shopping-cart me-2"></i>Ventas</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/inventario.php"><i class="fas fa-box me-2"></i>Inventario</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/empleado/ventas.php"><i class="fas fa-shopping-cart me-2"></i>Ventas</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/empleado/inventario.php"><i class="fas fa-box me-2"></i>Inventario</a></li>
 
                                 <li>
                                     <hr class="dropdown-divider">
@@ -219,7 +219,7 @@ $user_role = strtolower(trim($user_role));
                                 <li>
                                     <h6 class="dropdown-header text-warning">Formación</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/capacitaciones.php"><i class="fas fa-book me-2"></i>Capacitaciones</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/empleado/capacitaciones.php"><i class="fas fa-book me-2"></i>Capacitaciones</a></li>
 
                                 <li>
                                     <hr class="dropdown-divider">
@@ -228,8 +228,8 @@ $user_role = strtolower(trim($user_role));
                                 <li>
                                     <h6 class="dropdown-header text-warning">Cuenta</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/horarios.php"><i class="fas fa-calendar-alt me-2"></i>Horarios</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/perfil.php"><i class="fas fa-id-card me-2"></i>Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/empleado/horarios.php"><i class="fas fa-calendar-alt me-2"></i>Horarios</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/empleado/perfil.php"><i class="fas fa-id-card me-2"></i>Mi Perfil</a></li>
                             </ul>
                         </li>
                     <?php endif; ?>
@@ -297,17 +297,17 @@ $user_role = strtolower(trim($user_role));
                                 <hr class="dropdown-divider">
                             </li>
                             <li>
-                                <a class="dropdown-item" href="<?php echo BASE_URL; ?>pages/<?php echo $user_role; ?>/perfil.php">
+                                <a class="dropdown-item" href="<?php echo BASE_URL; ?>modules/<?php echo $user_role; ?>/perfil.php">
                                     <i class="fas fa-user me-2"></i> Mi Perfil
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="<?php echo BASE_URL; ?>pages/configuracion.php">
+                                <a class="dropdown-item" href="<?php echo BASE_URL; ?>modules/configuracion.php">
                                     <i class="fas fa-cog me-2"></i> Configuración
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="<?php echo BASE_URL; ?>pages/ayuda.php">
+                                <a class="dropdown-item" href="<?php echo BASE_URL; ?>modules/ayuda.php">
                                     <i class="fas fa-question-circle me-2"></i> Ayuda
                                 </a>
                             </li>

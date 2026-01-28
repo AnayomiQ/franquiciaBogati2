@@ -106,7 +106,6 @@ include __DIR__ . '/includes/header_public.php';
 ?>
 
 <style>
-/* Paleta de colores: Amarillo (#FDB813), Blanco (#FFFFFF), Negro (#000000), Café (#8B4513) */
 :root {
     --amarillo: #FDB813;
     --amarillo-claro: #FFE082;
@@ -578,7 +577,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-</script>
-
-<!-- Quité la línea del footer que causaba error -->
-<!-- Si necesitas footer, crea el archivo footer_public.php en includes/ -->

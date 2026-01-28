@@ -776,4 +776,50 @@ function displayFlashMessage() {
         echo "</div>";
     }
 }
+
+/**
+ * Cargar datos completos del usuario después de login
+ */
+function loadUserSessionData($userInfo) {
+    startSession();
+    
+    $_SESSION['user_id'] = $userInfo['id_usuario'];
+    $_SESSION['is_authenticated'] = true;
+    $_SESSION['user_role'] = $userInfo['rol'];
+    $_SESSION['username'] = $userInfo['username'];
+    $_SESSION['user_email'] = $userInfo['email'];
+    $_SESSION['nombres'] = $userInfo['nombres'];
+    $_SESSION['apellidos'] = $userInfo['apellidos'];
+    
+    // Datos específicos por rol
+    if ($userInfo['rol'] === 'empleado') {
+        $_SESSION['empleado_id'] = $userInfo['id_empleado'];
+        $_SESSION['empleado_cedula'] = $userInfo['cedula'] ?? null;
+        $_SESSION['codigo_local'] = $userInfo['empleado_codigo_local'] ?? null;
+        $_SESSION['cargo'] = $userInfo['cargo'] ?? null;
+    } elseif ($userInfo['rol'] === 'franquiciado') {
+        $_SESSION['franquiciado_cedula'] = $userInfo['cedula_franquiciado'];
+        $_SESSION['codigo_local'] = $userInfo['local_codigo'] ?? null;
+    }
+    
+    // Registrar login
+    logAction('LOGIN', 'Inicio de sesión exitoso', 'usuarios_sistema', $userInfo['id_usuario']);
+}
+/**
+ * Obtener ID del empleado actual
+ */
+function getCurrentEmployeeId() {
+    startSession();
+    return $_SESSION['empleado_id'] ?? null;
+}
+
+/**
+ * Obtener código del local actual
+ */
+function getCurrentLocalCode() {
+    startSession();
+    return $_SESSION['codigo_local'] ?? null;
+}
+
+
 ?>

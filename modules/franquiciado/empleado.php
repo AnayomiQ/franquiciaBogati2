@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             $stmt = $db->prepare("
-                INSERT INTO empleados 
+                INSERT INTO empleado 
                 (cedula, nombres, apellidos, fecha_nacimiento, telefono, email, 
                  cargo, salario, codigo_local, estado, fecha_contratacion) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())
@@ -36,11 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$cedula, $nombres, $apellidos, $fecha_nacimiento, $telefono, 
                           $email, $cargo, $salario, $codigo_local, $estado]);
             
-            logAction('CREAR_EMPLEADO', "Empleado creado: $cedula", 'empleados', $db->lastInsertId());
+            logAction('CREAR_EMPLEADO', "Empleado creado: $cedula", 'empleado', $db->lastInsertId());
             setFlashMessage('success', 'Empleado creado exitosamente');
             
             // CORRECCIÓN: Usar el parámetro GET original
-            header('Location: empleados.php' . ($local_param ? "?local=$local_param" : ''));
+            header('Location: empleado.php' . ($local_param ? "?local=$local_param" : ''));
             exit();
         } catch (PDOException $e) {
             setFlashMessage('error', 'Error al crear empleado: ' . $e->getMessage());
@@ -48,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Obtener empleados
-$empleados = [];
+// Obtener empleado
+$empleado = [];
 $where = $local_param ? "WHERE e.codigo_local = ?" : "";
 $params = $local_param ? [$local_param] : [];
 
@@ -57,7 +57,7 @@ try {
     $stmt = $db->prepare("
         SELECT e.*, l.nombre_local, l.ciudad,
                COUNT(ec.id_capacitacion) as capacitaciones_completadas
-        FROM empleados e
+        FROM empleado e
         LEFT JOIN locales l ON e.codigo_local = l.codigo_local
         LEFT JOIN empleado_capacitacion ec ON e.id_empleado = ec.id_empleado AND ec.aprobado = 1
         $where
@@ -65,9 +65,9 @@ try {
         ORDER BY e.estado DESC, e.fecha_contratacion DESC
     ");
     $stmt->execute($params);
-    $empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $empleado = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    error_log('Error al cargar empleados: ' . $e->getMessage());
+    error_log('Error al cargar empleado: ' . $e->getMessage());
 }
 
 // Obtener locales para dropdown
@@ -80,7 +80,7 @@ try {
     error_log('Error al cargar locales: ' . $e->getMessage());
 }
 
-$pageTitle = APP_NAME . ' - Gestión de Empleados';
+$pageTitle = APP_NAME . ' - Gestión de empleado';
 $pageStyles = ['admin.css'];
 
 require_once __DIR__ . '/../../includes/header.php'; 
@@ -93,7 +93,7 @@ require_once __DIR__ . '/../../includes/header.php';
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">
-                    <i class="fas fa-user-tie me-2"></i>Gestión de Empleados
+                    <i class="fas fa-user-tie me-2"></i>Gestión de empleado
                     <?php if ($local): ?>
                         <small class="text-muted"> - Local: <?php echo htmlspecialchars($local); ?></small>
                     <?php endif; ?>
@@ -114,8 +114,8 @@ require_once __DIR__ . '/../../includes/header.php';
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h6 class="card-title">Total Empleados</h6>
-                                    <h3 class="mb-0"><?php echo count($empleados); ?></h3>
+                                    <h6 class="card-title">Total empleado</h6>
+                                    <h3 class="mb-0"><?php echo count($empleado); ?></h3>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-users fa-2x opacity-50"></i>
@@ -131,7 +131,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                 <div>
                                     <h6 class="card-title">Activos</h6>
                                     <?php 
-                                        $activos = array_filter($empleados, fn($e) => $e['estado'] === 'ACTIVO');
+                                        $activos = array_filter($empleado, fn($e) => $e['estado'] === 'ACTIVO');
                                     ?>
                                     <h3 class="mb-0"><?php echo count($activos); ?></h3>
                                 </div>
@@ -149,7 +149,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                 <div>
                                     <h6 class="card-title">Nómina Mensual</h6>
                                     <?php 
-                                        $nomina = array_sum(array_column($empleados, 'salario'));
+                                        $nomina = array_sum(array_column($empleado, 'salario'));
                                     ?>
                                     <h3 class="mb-0">$<?php echo number_format($nomina, 2); ?></h3>
                                 </div>
@@ -167,8 +167,8 @@ require_once __DIR__ . '/../../includes/header.php';
                                 <div>
                                     <h6 class="card-title">Prom. Capacitaciones</h6>
                                     <?php 
-                                        $promCap = count($empleados) > 0 ? 
-                                                   array_sum(array_column($empleados, 'capacitaciones_completadas')) / count($empleados) : 0;
+                                        $promCap = count($empleado) > 0 ? 
+                                                   array_sum(array_column($empleado, 'capacitaciones_completadas')) / count($empleado) : 0;
                                     ?>
                                     <h3 class="mb-0"><?php echo number_format($promCap, 1); ?></h3>
                                 </div>
@@ -181,11 +181,11 @@ require_once __DIR__ . '/../../includes/header.php';
                 </div>
             </div>
 
-            <!-- Tabla de Empleados -->
+            <!-- Tabla de empleado -->
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover" id="tablaEmpleados">
+                        <table class="table table-hover" id="tablaempleado">
                             <thead>
                                 <tr>
                                     <th>Cédula</th>
@@ -200,7 +200,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($empleados as $empleado): ?>
+                                <?php foreach ($empleado as $empleado): ?>
                                     <tr>
                                         <td>
                                             <strong><?php echo htmlspecialchars($empleado['cedula']); ?></strong>
