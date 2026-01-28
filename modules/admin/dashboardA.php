@@ -254,7 +254,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
     .dashboard-content {
         padding: 20px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        background: linear-gradient(135deg, #ffc497 0%, #eff6ad 100%);
         min-height: calc(100vh - 70px);
         position: relative;
         overflow-x: hidden;
@@ -1144,43 +1144,6 @@ require_once __DIR__ . '/../../includes/header.php';
                             <p class="text-muted">No hay actividad reciente registrada</p>
                         </div>
                     <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- ======================================================================= -->
-        <!-- ACCIONES RÁPIDAS -->
-        <!-- ======================================================================= -->
-        <div class="grid-card full-width">
-            <div class="card-header">
-                <h5><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
-            </div>
-            <div class="card-body">
-                <div class="quick-actions">
-                    <a href="<?php echo BASE_URL; ?>modules/admin/usuarios.php?action=nuevo" class="quick-action-btn">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Nuevo Usuario</span>
-                    </a>
-                    <a href="<?php echo BASE_URL; ?>modules/admin/franquiciados.php?action=nuevo" class="quick-action-btn">
-                        <i class="fas fa-handshake"></i>
-                        <span>Nuevo Franquiciado</span>
-                    </a>
-                    <a href="<?php echo BASE_URL; ?>modules/admin/locales.php?action=nuevo" class="quick-action-btn">
-                        <i class="fas fa-store"></i>
-                        <span>Nuevo Local</span>
-                    </a>
-                    <a href="<?php echo BASE_URL; ?>modules/admin/productos.php?action=nuevo" class="quick-action-btn">
-                        <i class="fas fa-box"></i>
-                        <span>Nuevo Producto</span>
-                    </a>
-                    <a href="<?php echo BASE_URL; ?>modules/admin/contratos.php?action=nuevo" class="quick-action-btn">
-                        <i class="fas fa-file-contract"></i>
-                        <span>Nuevo Contrato</span>
-                    </a>
-                    <a href="<?php echo BASE_URL; ?>modules/admin/empleados.php?action=nuevo" class="quick-action-btn">
-                        <i class="fas fa-user-tie"></i>
-                        <span>Nuevo Empleado</span>
-                    </a>
                 </div>
             </div>
         </div>
