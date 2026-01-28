@@ -30,8 +30,8 @@ $userName = getCurrentUserName();
 $userRole = getCurrentUserRole();
 
 // USAR LOS MISMOS NOMBRES QUE EL LOGIN
-$empleado_id = $_SESSION['id_empleado'] ?? null;  // Cambiado de 'empleado_id' a 'id_empleado'
-$local_codigo = $_SESSION['codigo_local'] ?? null; // Cambiado de 'local_codigo' a 'codigo_local'
+$empleado_id = $_SESSION['id_empleado'] ?? null;
+$local_codigo = $_SESSION['codigo_local'] ?? null;
 
 // Verificar si hay algún mensaje flash
 if (isset($_GET['message'])) {
@@ -43,8 +43,6 @@ if (isset($_GET['message'])) {
 // Obtener conexión a la base de datos
 $db = Database::getConnection();
 
-
-// En modules/empleado/dashboard.php, actualiza la consulta de empleado:
 try {
     // Obtener información detallada del empleado
     $stmt = $db->prepare("
@@ -111,7 +109,7 @@ try {
     $productos_bajos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Obtener turno actual
-    $dia_semana = date('l'); // Obtiene el día en inglés
+    $dia_semana = date('l');
     $dias_espanol = [
         'Monday' => 'LUNES',
         'Tuesday' => 'MARTES',
@@ -204,38 +202,64 @@ require_once __DIR__ . '/../../includes/header.php';
 ?>
 
 <!-- =========================================================================== -->
-<!-- ESTILOS INLINE MEJORADOS PARA EMPLEADO -->
+<!-- ESTILOS INLINE CON PALETA CAFÉ/NARANJA/MARRÓN PIEL -->
 <!-- =========================================================================== -->
 <style>
     :root {
-        --employee-primary: linear-gradient(135deg, #FFD166 0%, #FFB347 100%);
-        --employee-secondary: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);
-        --employee-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        --employee-warning: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-        --employee-danger: linear-gradient(135deg, #f85032 0%, #e73827 100%);
-        --employee-info: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-        --glass-bg: rgba(255, 255, 255, 0.08);
-        --glass-border: rgba(255, 255, 255, 0.1);
+        /* Paleta café/naranja/marrón piel */
+        --cafe-oscuro: #8B4513;
+        --cafe-medio: #A0522D;
+        --cafe-claro: #D2B48C;
+        --naranja-oscuro: #FF8C00;
+        --naranja-medio: #FFA500;
+        --naranja-claro: #FFB74D;
+        --piel-oscuro: #E6BE8A;
+        --piel-medio: #F5DEB3;
+        --piel-claro: #FAEBD7;
+        --crema: #FFF8DC;
+        --marron-chocolate: #7B3F00;
+        
+        /* Gradientes para empleado */
+        --employee-primary: linear-gradient(135deg, var(--cafe-oscuro) 0%, var(--naranja-oscuro) 100%);
+        --employee-secondary: linear-gradient(135deg, var(--piel-oscuro) 0%, var(--naranja-claro) 100%);
+        --employee-success: linear-gradient(135deg, #8FBC8F 0%, #3CB371 100%);
+        --employee-warning: linear-gradient(135deg, var(--naranja-medio) 0%, #FFD700 100%);
+        --employee-danger: linear-gradient(135deg, #CD5C5C 0%, #B22222 100%);
+        --employee-info: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        --glass-bg: rgba(139, 69, 19, 0.08);
+        --glass-border: rgba(210, 180, 140, 0.3);
     }
 
     .dashboard-content {
         padding: 20px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        background: linear-gradient(135deg, var(--piel-claro) 0%, var(--crema) 100%);
         min-height: calc(100vh - 70px);
         position: relative;
         overflow-x: hidden;
     }
 
-    /* HEADER BIENVENIDA EMPLEADO */
+    .dashboard-content::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 300px;
+        background: var(--employee-primary);
+        z-index: 0;
+        opacity: 0.08;
+    }
+
+    /* HEADER BIENVENIDA EMPLEADO CON ESTILO CAFÉ */
     .welcome-section-employee {
-        background: linear-gradient(135deg, rgba(255, 209, 102, 0.1) 0%, rgba(255, 179, 71, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(245, 222, 179, 0.05) 100%);
         backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 209, 102, 0.2);
-        color: #2d3748;
+        border: 1px solid var(--glass-border);
+        color: var(--marron-chocolate);
         padding: 30px;
         border-radius: 20px;
         margin-bottom: 30px;
-        box-shadow: 0 15px 50px rgba(255, 209, 102, 0.15);
+        box-shadow: 0 15px 50px rgba(139, 69, 19, 0.15);
         position: relative;
         overflow: hidden;
     }
@@ -247,7 +271,7 @@ require_once __DIR__ . '/../../includes/header.php';
         left: 0;
         right: 0;
         bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path fill="%23FFD166" opacity="0.05" d="M0,0 L100,0 L100,100 Z"></path></svg>');
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path fill="%23A0522D" opacity="0.05" d="M0,0 L100,0 L100,100 Z"></path></svg>');
         background-size: cover;
     }
 
@@ -270,12 +294,14 @@ require_once __DIR__ . '/../../includes/header.php';
         background: var(--employee-primary);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .employee-info p {
         font-size: 1.1rem;
-        opacity: 0.8;
+        opacity: 0.9;
         margin-bottom: 15px;
+        color: var(--cafe-medio);
     }
 
     .employee-local {
@@ -283,9 +309,14 @@ require_once __DIR__ . '/../../includes/header.php';
         align-items: center;
         gap: 10px;
         padding: 8px 20px;
-        background: rgba(255, 209, 102, 0.1);
+        background: rgba(139, 69, 19, 0.1);
         border-radius: 50px;
-        border: 2px solid rgba(255, 209, 102, 0.3);
+        border: 2px solid rgba(210, 180, 140, 0.3);
+        font-weight: 600;
+        color: var(--cafe-oscuro);
+    }
+
+    .employee-meta .badge {
         font-weight: 600;
     }
 
@@ -301,7 +332,7 @@ require_once __DIR__ . '/../../includes/header.php';
         font-size: 3rem;
         font-weight: 700;
         border: 5px solid white;
-        box-shadow: 0 10px 30px rgba(255, 209, 102, 0.3);
+        box-shadow: 0 10px 30px rgba(139, 69, 19, 0.3);
     }
 
     /* ESTADÍSTICAS DEL DÍA */
@@ -313,36 +344,38 @@ require_once __DIR__ . '/../../includes/header.php';
     }
 
     .day-stat-card {
-        background: white;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(250, 235, 215, 0.8) 100%);
         border-radius: 15px;
         padding: 25px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 30px rgba(139, 69, 19, 0.08);
+        border: 1px solid var(--piel-medio);
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
         border-top: 4px solid transparent;
+        cursor: pointer;
     }
 
     .day-stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 15px 40px rgba(139, 69, 19, 0.15);
+        border-color: var(--naranja-claro);
     }
 
     .day-stat-card.sales {
-        border-top-color: #FFD166;
+        border-top-color: var(--cafe-oscuro);
     }
 
     .day-stat-card.revenue {
-        border-top-color: #36D1DC;
+        border-top-color: var(--naranja-medio);
     }
 
     .day-stat-card.customers {
-        border-top-color: #11998e;
+        border-top-color: var(--employee-success);
     }
 
     .day-stat-card.average {
-        border-top-color: #5B86E5;
+        border-top-color: #4682B4;
     }
 
     .stat-value-large {
@@ -350,11 +383,14 @@ require_once __DIR__ . '/../../includes/header.php';
         font-weight: 800;
         margin: 10px 0;
         line-height: 1;
+        background: var(--employee-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
     .stat-label {
         font-size: 0.9rem;
-        color: #718096;
+        color: var(--cafe-medio);
         text-transform: uppercase;
         letter-spacing: 1px;
         font-weight: 600;
@@ -366,6 +402,11 @@ require_once __DIR__ . '/../../includes/header.php';
         right: 20px;
         font-size: 2rem;
         opacity: 0.2;
+        color: var(--cafe-oscuro);
+    }
+
+    .small.text-muted {
+        color: var(--cafe-claro) !important;
     }
 
     /* SECCIONES DE CONTENIDO */
@@ -380,20 +421,21 @@ require_once __DIR__ . '/../../includes/header.php';
         background: white;
         border-radius: 15px;
         overflow: hidden;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 8px 30px rgba(139, 69, 19, 0.08);
         transition: transform 0.3s ease;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--piel-medio);
     }
 
     .section-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 15px 40px rgba(139, 69, 19, 0.15);
+        border-color: var(--cafe-claro);
     }
 
     .section-header {
         padding: 20px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-bottom: 1px solid #e2e8f0;
+        background: linear-gradient(135deg, var(--piel-claro) 0%, var(--crema) 100%);
+        border-bottom: 1px solid var(--piel-medio);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -403,14 +445,14 @@ require_once __DIR__ . '/../../includes/header.php';
         margin: 0;
         font-size: 1.2rem;
         font-weight: 700;
-        color: #2d3748;
+        color: var(--marron-chocolate);
         display: flex;
         align-items: center;
         gap: 10px;
     }
 
     .section-header h5 i {
-        color: #FFB347;
+        color: var(--cafe-oscuro);
     }
 
     .section-body {
@@ -424,14 +466,14 @@ require_once __DIR__ . '/../../includes/header.php';
         align-items: center;
         padding: 15px;
         margin-bottom: 10px;
-        background: #fff5f5;
+        background: rgba(205, 92, 92, 0.1);
         border-radius: 10px;
-        border-left: 4px solid #f85032;
+        border-left: 4px solid var(--employee-danger);
         transition: all 0.3s ease;
     }
 
     .product-low-item:hover {
-        background: #ffe5e5;
+        background: rgba(205, 92, 92, 0.2);
         transform: translateX(5px);
     }
 
@@ -439,7 +481,11 @@ require_once __DIR__ . '/../../includes/header.php';
         margin: 0;
         font-size: 1rem;
         font-weight: 600;
-        color: #2d3748;
+        color: var(--marron-chocolate);
+    }
+
+    .text-muted {
+        color: var(--cafe-claro) !important;
     }
 
     .product-stock {
@@ -456,14 +502,14 @@ require_once __DIR__ . '/../../includes/header.php';
     }
 
     .stock-critical {
-        background: #f85032;
+        background: var(--employee-danger);
         color: white;
         animation: pulse 2s infinite;
     }
 
     .stock-low {
-        background: #f7971e;
-        color: white;
+        background: var(--naranja-medio);
+        color: var(--marron-chocolate);
     }
 
     @keyframes pulse {
@@ -472,9 +518,20 @@ require_once __DIR__ . '/../../includes/header.php';
         100% { opacity: 1; }
     }
 
+    .btn-outline-danger {
+        border-color: var(--employee-danger);
+        color: var(--employee-danger);
+    }
+
+    .btn-outline-danger:hover {
+        background: var(--employee-danger);
+        border-color: var(--employee-danger);
+        color: white;
+    }
+
     /* TURNO ACTUAL */
     .shift-container {
-        background: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);
+        background: linear-gradient(135deg, var(--cafe-medio) 0%, var(--naranja-medio) 100%);
         border-radius: 15px;
         padding: 25px;
         color: white;
@@ -532,11 +589,11 @@ require_once __DIR__ . '/../../includes/header.php';
 
     .quick-action {
         background: white;
-        border: 2px solid #e2e8f0;
+        border: 2px solid var(--piel-medio);
         border-radius: 12px;
         padding: 20px;
         text-align: center;
-        color: #4b5563;
+        color: var(--cafe-medio);
         text-decoration: none;
         transition: all 0.3s ease;
         display: flex;
@@ -546,12 +603,12 @@ require_once __DIR__ . '/../../includes/header.php';
     }
 
     .quick-action:hover {
-        border-color: #FFD166;
-        background: #fff9eb;
+        border-color: var(--cafe-oscuro);
+        background: rgba(139, 69, 19, 0.05);
         transform: translateY(-3px);
-        color: #4b5563;
+        color: var(--cafe-oscuro);
         text-decoration: none;
-        box-shadow: 0 10px 25px rgba(255, 209, 102, 0.15);
+        box-shadow: 0 10px 25px rgba(139, 69, 19, 0.15);
     }
 
     .quick-action i {
@@ -573,14 +630,14 @@ require_once __DIR__ . '/../../includes/header.php';
         align-items: center;
         padding: 15px;
         margin-bottom: 10px;
-        background: #f8fafc;
+        background: rgba(143, 188, 143, 0.1);
         border-radius: 10px;
-        border-left: 4px solid #38ef7d;
+        border-left: 4px solid #3CB371;
         transition: all 0.3s ease;
     }
 
     .sale-item:hover {
-        background: #f1f5f9;
+        background: rgba(143, 188, 143, 0.2);
         transform: translateX(5px);
     }
 
@@ -588,7 +645,7 @@ require_once __DIR__ . '/../../includes/header.php';
         margin: 0;
         font-size: 0.95rem;
         font-weight: 600;
-        color: #2d3748;
+        color: var(--marron-chocolate);
     }
 
     .sale-amount {
@@ -604,13 +661,13 @@ require_once __DIR__ . '/../../includes/header.php';
         gap: 15px;
         padding: 15px;
         margin-bottom: 10px;
-        background: #f8fafc;
+        background: rgba(134, 206, 235, 0.1);
         border-radius: 10px;
         transition: all 0.3s ease;
     }
 
     .client-item:hover {
-        background: #f1f5f9;
+        background: rgba(134, 206, 235, 0.2);
         transform: translateX(5px);
     }
 
@@ -622,7 +679,7 @@ require_once __DIR__ . '/../../includes/header.php';
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        color: var(--marron-chocolate);
         font-weight: 700;
         font-size: 1.2rem;
     }
@@ -631,12 +688,12 @@ require_once __DIR__ . '/../../includes/header.php';
         margin: 0;
         font-size: 0.95rem;
         font-weight: 600;
-        color: #2d3748;
+        color: var(--marron-chocolate);
     }
 
     .client-meta {
         font-size: 0.8rem;
-        color: #718096;
+        color: var(--cafe-claro);
     }
 
     /* RELOJ EN TIEMPO REAL */
@@ -644,14 +701,14 @@ require_once __DIR__ . '/../../includes/header.php';
         position: fixed;
         bottom: 20px;
         right: 20px;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(139, 69, 19, 0.9);
         color: white;
         padding: 15px 25px;
         border-radius: 15px;
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(210, 180, 140, 0.3);
         z-index: 1000;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 30px rgba(139, 69, 19, 0.3);
     }
 
     .clock-time {
@@ -665,6 +722,67 @@ require_once __DIR__ . '/../../includes/header.php';
         font-size: 0.9rem;
         opacity: 0.8;
         text-align: center;
+    }
+
+    /* BOTONES ESTILIZADOS */
+    .btn-sm {
+        font-weight: 600;
+    }
+
+    .btn-warning {
+        background: var(--employee-warning);
+        border-color: var(--naranja-medio);
+        color: var(--marron-chocolate);
+    }
+
+    .btn-primary {
+        background: var(--employee-primary);
+        border-color: var(--cafe-oscuro);
+        color: white;
+    }
+
+    .btn-success {
+        background: var(--employee-success);
+        border-color: #3CB371;
+        color: white;
+    }
+
+    .btn-info {
+        background: var(--employee-info);
+        border-color: #4682B4;
+        color: white;
+    }
+
+    .btn-outline-primary {
+        border-color: var(--cafe-oscuro);
+        color: var(--cafe-oscuro);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--cafe-oscuro);
+        border-color: var(--cafe-oscuro);
+        color: white;
+    }
+
+    /* BADGES CON ESTILO CAFÉ */
+    .badge.bg-warning {
+        background: var(--employee-warning) !important;
+        color: var(--marron-chocolate);
+    }
+
+    .badge.bg-info {
+        background: var(--employee-info) !important;
+        color: white;
+    }
+
+    .badge.bg-success {
+        background: var(--employee-success) !important;
+        color: white;
+    }
+
+    .badge.bg-light {
+        background: var(--piel-medio) !important;
+        color: var(--marron-chocolate);
     }
 
     /* RESPONSIVE */
@@ -1043,7 +1161,6 @@ require_once __DIR__ . '/../../includes/header.php';
         fetch('../../includes/update_stats.php')
             .then(response => response.json())
             .then(data => {
-                // Actualizar contadores si es necesario
                 if (data.ventas_hoy) {
                     document.querySelector('.day-stat-card.sales .stat-value-large').textContent = data.ventas_hoy;
                     document.querySelector('.day-stat-card.revenue .stat-value-large').textContent = '$' + data.total_hoy;

@@ -5,8 +5,8 @@
 define('APP_NAME', 'Bogati Franquicias');
 define('APP_VERSION', '2.0.0');
 define('ENVIRONMENT', 'development'); // development | production
-//define('BASE_URL', 'http://172.29.42.94/franquiciabogati2/');
 define('BASE_URL', 'http://localhost/franquiciabogati2/');
+
 
 // ==========================================
 // ZONA HORARIA

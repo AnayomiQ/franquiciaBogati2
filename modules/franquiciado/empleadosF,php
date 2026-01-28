@@ -1,0 +1,691 @@
+<?php
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/functions.php';
+require_once __DIR__ . '/../../db_connection.php';
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+startSession();
+requireAuth();
+requireAnyRole(['admin', 'franquiciado']);
+
+$db = Database::getConnection();
+$userRole = getCurrentUserRole();
+$cedula_franquiciado = $_SESSION['cedula_franquiciado'] ?? null;
+
+// Consulta según rol
+if ($userRole === 'franquiciado') {
+    $sql = "SELECT e.*, l.nombre_local, 
+                   TIMESTAMPDIFF(YEAR, e.fecha_nacimiento, CURDATE()) as edad,
+                   DATEDIFF(CURDATE(), e.fecha_contratacion) as dias_contratado
+            FROM empleados e
+            INNER JOIN locales l ON e.codigo_local = l.codigo_local
+            WHERE l.cedula_franquiciado = ?
+            ORDER BY e.fecha_contratacion DESC";
+    $stmt = $db->prepare($sql);
+    $stmt->execute([$cedula_franquiciado]);
+} else {
+    $sql = "SELECT e.*, l.nombre_local, l.ciudad,
+                   f.nombres as franquiciado_nombre, f.apellidos as franquiciado_apellidos,
+                   TIMESTAMPDIFF(YEAR, e.fecha_nacimiento, CURDATE()) as edad,
+                   DATEDIFF(CURDATE(), e.fecha_contratacion) as dias_contratado
+            FROM empleados e
+            INNER JOIN locales l ON e.codigo_local = l.codigo_local
+            LEFT JOIN franquiciados f ON l.cedula_franquiciado = f.cedula
+            ORDER BY e.fecha_contratacion DESC";
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
+}
+
+$empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener estadísticas
+$total_empleados = count($empleados);
+$activos = count(array_filter($empleados, fn($e) => $e['estado'] === 'ACTIVO'));
+$inactivos = count(array_filter($empleados, fn($e) => $e['estado'] === 'INACTIVO'));
+$por_cargo = array_count_values(array_column($empleados, 'cargo'));
+
+$pageTitle = APP_NAME . ' - Gestión de Empleados';
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="fas fa-user-tie me-2"></i>Gestión de Empleados</h2>
+            <p class="text-muted mb-0">Administra el personal de tus locales</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoEmpleadoModal">
+                <i class="fas fa-user-plus me-2"></i>Nuevo Empleado
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" class="form-control" placeholder="Nombre o cédula..." id="searchInput">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Estado</label>
+                    <select class="form-select" id="filterEstado">
+                        <option value="">Todos</option>
+                        <option value="ACTIVO">Activos</option>
+                        <option value="INACTIVO">Inactivos</option>
+                        <option value="VACACIONES">Vacaciones</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Cargo</label>
+                    <select class="form-select" id="filterCargo">
+                        <option value="">Todos</option>
+                        <option value="GERENTE">Gerente</option>
+                        <option value="HELADERO">Heladero</option>
+                        <option value="CAJERO">Cajero</option>
+                        <option value="AYUDANTE">Ayudante</option>
+                        <option value="LIMPIEZA">Limpieza</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Local</label>
+                    <select class="form-select" id="filterLocal">
+                        <option value="">Todos</option>
+                        <?php
+                        $locales_unicos = array_unique(array_column($empleados, 'nombre_local'));
+                        foreach ($locales_unicos as $local):
+                            if ($local): ?>
+                                <option value="<?php echo htmlspecialchars($local); ?>">
+                                    <?php echo htmlspecialchars($local); ?>
+                                </option>
+                            <?php endif;
+                        endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Empleados</h6>
+                            <h3 class="mb-0"><?php echo $total_empleados; ?></h3>
+                        </div>
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Activos</h6>
+                            <h3 class="mb-0"><?php echo $activos; ?></h3>
+                        </div>
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Inactivos</h6>
+                            <h3 class="mb-0"><?php echo $inactivos; ?></h3>
+                        </div>
+                        <div class="stat-icon bg-danger">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Promedio Salario</h6>
+                            <h3 class="mb-0">$
+                                <?php 
+                                $total_salario = array_sum(array_column($empleados, 'salario'));
+                                $promedio = $activos > 0 ? $total_salario / $activos : 0;
+                                echo number_format($promedio, 2);
+                                ?>
+                            </h3>
+                        </div>
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distribución por Cargo -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Distribución por Cargo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <?php foreach ($por_cargo as $cargo => $cantidad): 
+                            $porcentaje = $total_empleados > 0 ? ($cantidad / $total_empleados) * 100 : 0;
+                            $color_class = [
+                                'GERENTE' => 'bg-primary',
+                                'HELADERO' => 'bg-info',
+                                'CAJERO' => 'bg-success',
+                                'AYUDANTE' => 'bg-warning',
+                                'LIMPIEZA' => 'bg-secondary'
+                            ][$cargo] ?? 'bg-light';
+                        ?>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <div class="cargo-indicator <?php echo $color_class; ?>"></div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0"><?php echo $cargo; ?></h6>
+                                        <div class="text-muted"><?php echo $cantidad; ?> empleados</div>
+                                        <div class="progress mt-1" style="height: 5px;">
+                                            <div class="progress-bar <?php echo str_replace('bg-', 'bg-', $color_class); ?>" 
+                                                 style="width: <?php echo $porcentaje; ?>%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary text-start" data-bs-toggle="modal" data-bs-target="#asignarTurnoModal">
+                            <i class="fas fa-calendar-alt me-2"></i>Asignar Turnos
+                        </button>
+                        <button class="btn btn-outline-success text-start" data-bs-toggle="modal" data-bs-target="#capacitacionModal">
+                            <i class="fas fa-graduation-cap me-2"></i>Programar Capacitación
+                        </button>
+                        <button class="btn btn-outline-warning text-start" data-bs-toggle="modal" data-bs-target="#evaluacionModal">
+                            <i class="fas fa-clipboard-check me-2"></i>Evaluación de Desempeño
+                        </button>
+                        <button class="btn btn-outline-info text-start" onclick="generarReporteNomina()">
+                            <i class="fas fa-file-excel me-2"></i>Generar Nómina
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Empleados -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="empleadosTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Empleado</th>
+                            <th>Cargo</th>
+                            <th>Local</th>
+                            <th>Contacto</th>
+                            <th>Salario</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($empleados as $index => $empleado): ?>
+                            <tr>
+                                <td>
+                                    <span class="badge bg-light text-dark"><?php echo $index + 1; ?></span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-3">
+                                            <?php echo strtoupper(substr($empleado['nombres'], 0, 1)); ?>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0"><?php echo htmlspecialchars($empleado['nombres'] . ' ' . $empleado['apellidos']); ?></h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-id-card me-1"></i>
+                                                <?php echo htmlspecialchars($empleado['cedula']); ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-cargo bg-<?php 
+                                        echo [
+                                            'GERENTE' => 'primary',
+                                            'HELADERO' => 'info',
+                                            'CAJERO' => 'success',
+                                            'AYUDANTE' => 'warning',
+                                            'LIMPIEZA' => 'secondary'
+                                        ][$empleado['cargo']] ?? 'light';
+                                    ?>">
+                                        <?php echo htmlspecialchars($empleado['cargo']); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div>
+                                        <div><?php echo htmlspecialchars($empleado['nombre_local']); ?></div>
+                                        <small class="text-muted">
+                                            <?php if ($userRole === 'admin' && isset($empleado['franquiciado_nombre'])): ?>
+                                                Franquiciado: <?php echo htmlspecialchars($empleado['franquiciado_nombre'] . ' ' . $empleado['franquiciado_apellidos']); ?>
+                                            <?php endif; ?>
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <div><i class="fas fa-phone me-1"></i> <?php echo htmlspecialchars($empleado['telefono']); ?></div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-envelope me-1"></i>
+                                            <?php echo htmlspecialchars($empleado['email'] ?? 'N/A'); ?>
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-success">$<?php echo number_format($empleado['salario'], 2); ?></strong>
+                                    <div class="text-muted">
+                                        <small>
+                                            <?php echo $empleado['dias_contratado']; ?> días
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php 
+                                    $estado_badge = [
+                                        'ACTIVO' => ['class' => 'success', 'icon' => 'check-circle'],
+                                        'INACTIVO' => ['class' => 'danger', 'icon' => 'times-circle'],
+                                        'VACACIONES' => ['class' => 'warning', 'icon' => 'umbrella-beach']
+                                    ][$empleado['estado']] ?? ['class' => 'secondary', 'icon' => 'question-circle'];
+                                    ?>
+                                    <span class="badge bg-<?php echo $estado_badge['class']; ?>">
+                                        <i class="fas fa-<?php echo $estado_badge['icon']; ?> me-1"></i>
+                                        <?php echo htmlspecialchars($empleado['estado']); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="detalle_empleado.php?id=<?php echo $empleado['id_empleado']; ?>" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="editar_empleado.php?id=<?php echo $empleado['id_empleado']; ?>" 
+                                           class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-info" 
+                                                onclick="verTurnos(<?php echo $empleado['id_empleado']; ?>)">
+                                            <i class="fas fa-calendar"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                onclick="confirmarDesactivar(<?php echo $empleado['id_empleado']; ?>, '<?php echo $empleado['estado']; ?>')">
+                                            <i class="fas fa-user-slash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginación -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <span class="text-muted">
+                        Mostrando <?php echo count($empleados); ?> de <?php echo count($empleados); ?> empleados
+                    </span>
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nuevo Empleado -->
+<div class="modal fade" id="nuevoEmpleadoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Empleado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="procesar_empleado.php" method="POST">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cédula *</label>
+                            <input type="text" class="form-control" name="cedula" required maxlength="10">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombres *</label>
+                            <input type="text" class="form-control" name="nombres" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Apellidos *</label>
+                            <input type="text" class="form-control" name="apellidos" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha Nacimiento</label>
+                            <input type="date" class="form-control" name="fecha_nacimiento">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" name="telefono" maxlength="10">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cargo *</label>
+                            <select class="form-select" name="cargo" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="GERENTE">Gerente</option>
+                                <option value="HELADERO">Heladero</option>
+                                <option value="CAJERO">Cajero</option>
+                                <option value="AYUDANTE">Ayudante</option>
+                                <option value="LIMPIEZA">Limpieza</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Salario ($)</label>
+                            <input type="number" step="0.01" class="form-control" name="salario" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Local *</label>
+                            <select class="form-select" name="codigo_local" required>
+                                <option value="">Seleccionar...</option>
+                                <?php
+                                if ($userRole === 'franquiciado') {
+                                    $sql_locales = "SELECT codigo_local, nombre_local FROM locales WHERE cedula_franquiciado = ?";
+                                    $stmt_locales = $db->prepare($sql_locales);
+                                    $stmt_locales->execute([$cedula_franquiciado]);
+                                } else {
+                                    $sql_locales = "SELECT codigo_local, nombre_local FROM locales";
+                                    $stmt_locales = $db->query($sql_locales);
+                                }
+                                $locales_list = $stmt_locales->fetchAll(PDO::FETCH_ASSOC);
+                                foreach ($locales_list as $local): ?>
+                                    <option value="<?php echo $local['codigo_local']; ?>">
+                                        <?php echo htmlspecialchars($local['nombre_local']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha Contratación</label>
+                            <input type="date" class="form-control" name="fecha_contratacion" value="<?php echo date('Y-m-d'); ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" name="estado">
+                                <option value="ACTIVO" selected>Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                                <option value="VACACIONES">Vacaciones</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Empleado</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Asignar Turno -->
+<div class="modal fade" id="asignarTurnoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Asignar Turno</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="procesar_turno.php" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Empleado</label>
+                        <select class="form-select" name="id_empleado" required>
+                            <option value="">Seleccionar...</option>
+                            <?php foreach ($empleados as $emp): ?>
+                                <option value="<?php echo $emp['id_empleado']; ?>">
+                                    <?php echo htmlspecialchars($emp['nombres'] . ' ' . $emp['apellidos']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Día de la Semana</label>
+                        <select class="form-select" name="dia_semana" required>
+                            <option value="LUNES">Lunes</option>
+                            <option value="MARTES">Martes</option>
+                            <option value="MIERCOLES">Miércoles</option>
+                            <option value="JUEVES">Jueves</option>
+                            <option value="VIERNES">Viernes</option>
+                            <option value="SABADO">Sábado</option>
+                            <option value="DOMINGO">Domingo</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Hora Entrada</label>
+                            <input type="time" class="form-control" name="hora_entrada" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Hora Salida</label>
+                            <input type="time" class="form-control" name="hora_salida" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Asignar Turno</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3a0ca3;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --info-color: #17a2b8;
+        --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    }
+    
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+        box-shadow: var(--card-shadow);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+    
+    .badge-cargo {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .cargo-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+    }
+    
+    .table th {
+        border-top: none;
+        border-bottom: 2px solid #f0f0f0;
+        font-weight: 600;
+        color: #6c757d;
+        background-color: #f8f9fa;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .btn-group .btn {
+        border-radius: 6px;
+        margin-right: 5px;
+    }
+    
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+</style>
+
+<script>
+    // Filtros de búsqueda
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        filterTable();
+    });
+    
+    document.getElementById('filterEstado').addEventListener('change', filterTable);
+    document.getElementById('filterCargo').addEventListener('change', filterTable);
+    document.getElementById('filterLocal').addEventListener('change', filterTable);
+    
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const estado = document.getElementById('filterEstado').value;
+        const cargo = document.getElementById('filterCargo').value;
+        const local = document.getElementById('filterLocal').value;
+        
+        document.querySelectorAll('#empleadosTable tbody tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowEstado = row.cells[6].querySelector('.badge').textContent.trim();
+            const rowCargo = row.cells[2].querySelector('.badge').textContent.trim();
+            const rowLocal = row.cells[3].textContent.trim();
+            
+            const matchSearch = text.includes(search);
+            const matchEstado = !estado || rowEstado.includes(estado);
+            const matchCargo = !cargo || rowCargo === cargo;
+            const matchLocal = !local || rowLocal.includes(local);
+            
+            row.style.display = (matchSearch && matchEstado && matchCargo && matchLocal) ? '' : 'none';
+        });
+    }
+    
+    // Función para ver turnos
+    function verTurnos(idEmpleado) {
+        window.location.href = 'turnos_empleado.php?id=' + idEmpleado;
+    }
+    
+    // Función para confirmar desactivación
+    function confirmarDesactivar(idEmpleado, estadoActual) {
+        const acciones = {
+            'ACTIVO': { texto: 'Desactivar', nuevoEstado: 'INACTIVO' },
+            'INACTIVO': { texto: 'Activar', nuevoEstado: 'ACTIVO' },
+            'VACACIONES': { texto: 'Finalizar Vacaciones', nuevoEstado: 'ACTIVO' }
+        };
+        
+        const accion = acciones[estadoActual] || { texto: 'Cambiar Estado', nuevoEstado: 'ACTIVO' };
+        
+        if (confirm(`¿${accion.texto} este empleado?`)) {
+            window.location.href = 'cambiar_estado_empleado.php?id=' + idEmpleado + '&estado=' + accion.nuevoEstado;
+        }
+    }
+    
+    // Función para generar reporte de nómina
+    function generarReporteNomina() {
+        const fecha = prompt('Ingrese el mes y año para la nómina (MM/YYYY):', '<?php echo date('m/Y'); ?>');
+        if (fecha) {
+            window.location.href = 'generar_nomina.php?periodo=' + encodeURIComponent(fecha);
+        }
+    }
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

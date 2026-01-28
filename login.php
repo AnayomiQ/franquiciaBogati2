@@ -3,6 +3,8 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db_connection.php';
 require_once __DIR__ . '/includes/functions.php';
 
+startSession();
+
 // Redirigir si ya está autenticado
 redirectIfAuthenticated();
 

@@ -13,45 +13,45 @@ $db = Database::getConnection();
 $action = $_GET['action'] ?? '';
 $id = $_GET['id'] ?? 0;
 
+// 🆕 NUEVO: Limpiar filtros
+if ($action === 'clear_filters') {
+    unset($_SESSION['filtros_royalty']);
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
+        echo json_encode(['success' => true]);
+        exit();
+    }
+    header('Location: pagos_royalty.php');
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'confirmar_pago') {
-        // Confirmar pago de royalty
+        //  MEJORADO: Usando trigger automático
         $id_pago = $_POST['id_pago'];
 
-        // Total pendiente usando la vista (aproximadamente línea 140-155)
         try {
-            // Total pendiente usando la vista
+            // Actualizar estado del pago (el TRIGGER registrará automáticamente)
             $stmt = $db->prepare("
-        SELECT 
-            COUNT(*) as total,
-            SUM(saldo_pendiente) as total_monto
-        FROM vw_pagos_royalty_detallados
-        WHERE estado = 'PENDIENTE'
-    ");
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $stats['pendientes'] = [
-                'total' => $result['total'] ?? 0,
-                'total_monto' => $result['total_monto'] ?? 0
-            ];
+                UPDATE pagos_royalty 
+                SET estado = 'CANCELADO',
+                    fecha_pago = CURDATE()
+                WHERE id_pago = ? AND estado = 'PENDIENTE'
+            ");
+            $stmt->execute([$id_pago]);
 
             if ($stmt->rowCount() > 0) {
-                // Log adicional en PHP (opcional, ya que el trigger hace lo mismo)
-                logAction(
-                    'CONFIRMAR_PAGO_ROYALTY',
-                    'pagos_royalty',
-                    "Pago confirmado ID: $id_pago - El trigger tg_auditoria_confirmacion_pago registró el log en DB"
-                );
-
-                setFlashMessage('success', 'Pago confirmado exitosamente. El trigger registró la auditoría.');
+                // El trigger tg_auditoria_confirmacion_pago ya registró el log
+                setFlashMessage('success', ' Pago confirmado exitosamente. El trigger registró la auditoría automáticamente.');
             } else {
-                setFlashMessage('warning', 'El pago ya fue confirmado o no existe');
+                setFlashMessage('warning', ' El pago ya fue confirmado o no existe');
             }
 
             header('Location: pagos_royalty.php');
             exit();
         } catch (PDOException $e) {
-            setFlashMessage('error', 'Error al confirmar pago: ' . $e->getMessage());
+            setFlashMessage('error', ' Error al confirmar pago: ' . $e->getMessage());
+            header('Location: pagos_royalty.php');
+            exit();
         }
     } elseif ($action === 'filtrar') {
         // Guardar filtros en sesión
@@ -66,12 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: pagos_royalty.php');
         exit();
     } elseif ($action === 'generar_pagos') {
-        // Generar pagos pendientes usando el PROCEDURE ALMACENADO
+        //  USANDO PROCEDIMIENTO ALMACENADO
         $mes = $_POST['mes'] ?? date('n');
         $anio = $_POST['anio'] ?? date('Y');
 
         try {
-            // USAR EL PROCEDIMIENTO ALMACENADO en lugar de la lógica PHP
+            // USAR EL PROCEDIMIENTO ALMACENADO pa_generar_pagos_royalty
             $stmt = $db->prepare("CALL pa_generar_pagos_royalty(?, ?)");
             $stmt->execute([$mes, $anio]);
 
@@ -93,11 +93,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     "Total generados: $pagosGenerados"
             );
 
-            setFlashMessage('success', "Se generaron $pagosGenerados pagos para $mes/$anio usando el procedimiento almacenado");
+            setFlashMessage('success', " Se generaron $pagosGenerados pagos para $mes/$anio usando el procedimiento almacenado");
         } catch (PDOException $e) {
-            setFlashMessage('error', 'Error al generar pagos: ' . $e->getMessage());
+            setFlashMessage('error', ' Error al generar pagos: ' . $e->getMessage());
         }
 
+        header('Location: pagos_royalty.php');
+        exit();
+    }
+}
+
+// 🆕 NUEVO: Verificar contratos vencidos automáticamente
+if ($action === 'verificar_vencidos') {
+    try {
+        // Llamar al procedimiento almacenado (si existe)
+        try {
+            $stmt = $db->prepare("CALL pa_verificar_contratos_vencidos()");
+            $stmt->execute();
+            setFlashMessage('success', ' Verificación de contratos completada');
+        } catch (Exception $e) {
+            // Si el procedimiento no existe, hacer verificación manual
+            $stmt = $db->prepare("
+                UPDATE contratos_franquicia 
+                SET estado = 'VENCIDO' 
+                WHERE fecha_fin < CURDATE() AND estado = 'ACTIVO'
+            ");
+            $stmt->execute();
+            $afectados = $stmt->rowCount();
+            setFlashMessage('info', " Se marcaron $afectados contratos como vencidos (procedimiento no disponible)");
+        }
+        
+        header('Location: pagos_royalty.php');
+        exit();
+    } catch (PDOException $e) {
+        setFlashMessage('error', ' Error: ' . $e->getMessage());
+        header('Location: pagos_royalty.php');
+        exit();
+    }
+}
+
+// 🆕 NUEVO: Generar reporte de pagos
+if ($action === 'reporte_pendientes') {
+    try {
+        // Intentar usar procedimiento con CURSOR si existe
+        try {
+            $stmt = $db->prepare("CALL pa_generar_reporte_pendientes()");
+            $stmt->execute();
+            $reporte = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            // Si no existe, usar consulta directa
+            $stmt = $db->prepare("
+                SELECT 
+                    cf.numero_contrato as Contrato,
+                    CONCAT(f.nombres, ' ', f.apellidos) as Franquiciado,
+                    l.nombre_local as Local,
+                    pr.mes as Mes,
+                    pr.anio as Año,
+                    (pr.monto_royalty + pr.monto_publicidad) as 'Monto Pendiente'
+                FROM pagos_royalty pr
+                INNER JOIN contratos_franquicia cf ON pr.id_contrato = cf.id_contrato
+                INNER JOIN locales l ON cf.codigo_local = l.codigo_local
+                INNER JOIN franquiciados f ON cf.cedula_franquiciado = f.cedula
+                WHERE pr.estado = 'PENDIENTE'
+                ORDER BY pr.anio DESC, pr.mes DESC
+            ");
+            $stmt->execute();
+            $reporte = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+        
+        // Exportar a CSV
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=reporte_pendientes_' . date('Y-m-d') . '.csv');
+        
+        $output = fopen('php://output', 'w');
+        
+        // Encabezados
+        fputcsv($output, ['Contrato', 'Franquiciado', 'Local', 'Mes', 'Año', 'Monto Pendiente']);
+        
+        // Datos
+        foreach ($reporte as $row) {
+            fputcsv($output, $row);
+        }
+        
+        fclose($output);
+        exit();
+    } catch (PDOException $e) {
+        setFlashMessage('error', ' Error al generar reporte: ' . $e->getMessage());
         header('Location: pagos_royalty.php');
         exit();
     }
@@ -109,21 +190,17 @@ $currentMonth = date('n');
 $currentYear = date('Y');
 
 try {
-    // Total pendiente usando la vista
+    //  USANDO FUNCIÓN SQL para cálculos
     $stmt = $db->prepare("
         SELECT 
-            SUM(total_pendiente) as total_monto_pendiente,
-            COUNT(*) as total_registros
-        FROM (
-            SELECT saldo_pendiente as total_pendiente
-            FROM vw_pagos_royalty_detallados
-            WHERE estado = 'PENDIENTE'
-        ) as subquery
+            SUM(CASE WHEN estado = 'PENDIENTE' THEN fn_total_a_pagar(monto_royalty, monto_publicidad) ELSE 0 END) as total_monto_pendiente,
+            COUNT(CASE WHEN estado = 'PENDIENTE' THEN 1 END) as total_registros_pendientes
+        FROM pagos_royalty
     ");
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $stats['pendientes'] = [
-        'total' => $result['total_registros'] ?? 0,
+        'total' => $result['total_registros_pendientes'] ?? 0,
         'total_monto' => $result['total_monto_pendiente'] ?? 0
     ];
 
@@ -131,7 +208,8 @@ try {
     $stmt = $db->prepare("
         SELECT 
             total_cancelado,
-            total_recaudado
+            total_recaudado,
+            pagos_cancelados
         FROM vw_resumen_pagos_mensual
         WHERE mes = ? AND anio = ?
     ");
@@ -139,7 +217,7 @@ try {
     $resumenMes = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $stats['cancelados_mes'] = [
-        'total' => 0, // No tenemos el conteo en la vista
+        'total' => $resumenMes['pagos_cancelados'] ?? 0,
         'total_monto' => $resumenMes['total_cancelado'] ?? 0
     ];
 
@@ -178,7 +256,7 @@ try {
     error_log('Error al cargar locales: ' . $e->getMessage());
 }
 
-// Obtener pagos con filtros usando la VISTA vw_pagos_royalty_detallados
+//  MEJORADO: Obtener pagos con FUNCIONES SQL
 $filtros = $_SESSION['filtros_royalty'] ?? [
     'mes' => date('n'),
     'anio' => date('Y'),
@@ -189,7 +267,10 @@ $filtros = $_SESSION['filtros_royalty'] ?? [
 $pagos = [];
 try {
     $query = "
-        SELECT *
+        SELECT 
+            *,
+            fn_mes_espanol(mes) as mes_nombre_espanol,
+            fn_total_a_pagar(monto_royalty, monto_publicidad) as total_calculado
         FROM vw_pagos_royalty_detallados
         WHERE 1=1
     ";
@@ -251,9 +332,23 @@ require_once __DIR__ . '/../../includes/header.php';
                         <p class="mb-0 opacity-75">Gestión de pagos de royalties y canon de publicidad</p>
                     </div>
                 </div>
-                <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#modalGenerarPagos">
-                    <i class="fas fa-plus me-2"></i> Generar Pagos
-                </button>
+                <div class="btn-group">
+                    <!-- Botón existente -->
+                    <button class="btn btn-primary-custom me-2" data-bs-toggle="modal" data-bs-target="#modalGenerarPagos">
+                        <i class="fas fa-plus me-2"></i> Generar Pagos
+                    </button>
+                    
+                    <!-- 🆕 NUEVO: Botón para verificar contratos vencidos -->
+                    <a href="?action=verificar_vencidos" class="btn btn-outline-light me-2" 
+                       onclick="return confirm('¿Verificar contratos vencidos y generar notificaciones?')">
+                        <i class="fas fa-calendar-check me-2"></i> Verificar Vencidos
+                    </a>
+                    
+                    <!-- 🆕 NUEVO: Botón para descargar reporte -->
+                    <a href="?action=reporte_pendientes" class="btn btn-outline-light">
+                        <i class="fas fa-file-excel me-2"></i> Reporte Pendientes
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -394,9 +489,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                     </td>
                                 </tr>
                             <?php else: ?>
-                                <?php foreach ($pagos as $pago):
-                                    $mesNombre = DateTime::createFromFormat('!m', $pago['mes'])->format('F');
-                                ?>
+                                <?php foreach ($pagos as $pago): ?>
                                     <tr>
                                         <td class="ps-4">
                                             <strong>#<?php echo str_pad($pago['id_pago'], 4, '0', STR_PAD_LEFT); ?></strong>
@@ -412,10 +505,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <strong><?php
-                                                        $nombreCompleto = trim(($pago['franquiciado_nombres'] ?? '') . ' ' . ($pago['franquiciado_apellidos'] ?? ''));
-                                                        echo htmlspecialchars($nombreCompleto ?: 'N/A');
-                                                        ?></strong>
+                                                <strong><?php echo htmlspecialchars($pago['franquiciado_nombres'] ?? 'N/A'); ?></strong>
                                                 <small class="text-muted"><?php echo htmlspecialchars($pago['cedula_franquiciado'] ?? 'Sin cédula'); ?></small>
                                                 <small class="text-muted"><?php echo htmlspecialchars($pago['email_franquiciado'] ?? 'Sin email'); ?></small>
                                                 <small class="text-muted"><?php echo htmlspecialchars($pago['telefono_franquiciado'] ?? 'Sin teléfono'); ?></small>
@@ -423,7 +513,8 @@ require_once __DIR__ . '/../../includes/header.php';
                                         </td>
                                         <td class="text-center">
                                             <span class="badge bg-light text-dark border">
-                                                <?php echo $mesNombre . ' ' . $pago['anio']; ?>
+                                                <!--  USANDO LA FUNCIÓN SQL -->
+                                                <?php echo htmlspecialchars($pago['mes_nombre_espanol'] ?? '') . ' ' . $pago['anio']; ?>
                                             </span>
                                         </td>
                                         <td class="text-end">
@@ -442,8 +533,9 @@ require_once __DIR__ . '/../../includes/header.php';
                                             </span>
                                         </td>
                                         <td class="text-end">
+                                            <!--  USANDO EL TOTAL CALCULADO POR LA FUNCIÓN SQL -->
                                             <strong class="text-success">
-                                                $<?php echo number_format($pago['total_a_pagar'], 2); ?>
+                                                $<?php echo number_format($pago['total_calculado'], 2); ?>
                                             </strong>
                                         </td>
                                         <td class="text-center">
@@ -495,7 +587,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                     </td>
                                     <td class="text-end">
                                         <strong class="text-success">
-                                            $<?php echo number_format(array_sum(array_column($pagos, 'total_a_pagar')), 2); ?>
+                                            $<?php echo number_format(array_sum(array_column($pagos, 'total_calculado')), 2); ?>
                                         </strong>
                                     </td>
                                     <td colspan="3"></td>
@@ -529,7 +621,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 <div class="modal-body p-4">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
-                        Se generarán pagos para todos los contratos activos.
+                        Se generarán pagos para todos los contratos activos usando el <strong>procedimiento almacenado</strong>.
                         Los pagos ya existentes no se duplicarán.
                     </div>
 
@@ -595,7 +687,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <script>
     // Función para confirmar pago
     function confirmarPago(idPago, numeroContrato) {
-        if (confirm(`¿Confirmar pago #${idPago} del contrato "${numeroContrato}"?`)) {
+        if (confirm(`¿Confirmar pago #${idPago} del contrato "${numeroContrato}"?\n\n El trigger registrará automáticamente la auditoría.`)) {
             document.getElementById('idPagoConfirmar').value = idPago;
             document.getElementById('formConfirmarPago').submit();
         }
@@ -667,6 +759,19 @@ require_once __DIR__ . '/../../includes/header.php';
     .btn-primary-custom:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(74, 107, 175, 0.4);
+    }
+
+    .btn-outline-light {
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 50px;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: white;
     }
 
     .filter-card {
@@ -833,6 +938,17 @@ require_once __DIR__ . '/../../includes/header.php';
 
         .table-responsive {
             font-size: 0.9rem;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary-custom,
+        .btn-outline-light {
+            width: 100%;
+            margin: 0.2rem 0;
         }
     }
 </style>

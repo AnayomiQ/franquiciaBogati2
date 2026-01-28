@@ -171,8 +171,8 @@ $user_role = strtolower(trim($user_role));
                                 <li>
                                     <h6 class="dropdown-header text-warning">Mi Negocio</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/locales.php"><i class="fas fa-store-alt me-2"></i>Mis Locales</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/ventas.php"><i class="fas fa-chart-line me-2"></i>Ventas</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/localesF.php"><i class="fas fa-store-alt me-2"></i>Mis Locales</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/ventasF.php"><i class="fas fa-chart-line me-2"></i>Ventas</a></li>
 
                                 <li>
                                     <hr class="dropdown-divider">
@@ -191,7 +191,7 @@ $user_role = strtolower(trim($user_role));
                                 <li>
                                     <h6 class="dropdown-header text-warning">Personal</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/empleados.php"><i class="fas fa-users me-2"></i>Empleados</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/franquiciado/empleadosF.php"><i class="fas fa-users me-2"></i>Empleados</a></li>
                             </ul>
                         </li>
 

@@ -20,7 +20,7 @@ requireAnyRole(['admin']);
 // Obtener información del usuario usando la función que creaste
 $userInfo = getCurrentUserInfo();
 if (!$userInfo) {
-    // Si no se puede obtener la info, redirigir al login
+    // Si no se pudo obtener la info, redirigir al login
     session_destroy();
     setFlashMessage('error', 'No se pudo cargar la información del usuario. Por favor, inicie sesión nuevamente.');
     redirect(BASE_URL . 'login.php');
@@ -77,8 +77,7 @@ try {
     $stmt->execute();
     $contratosCount = $stmt->fetchColumn();
     
-    // Conteo de usuarios registrados hoy (usando fecha_registro de la sesión)
-    // Nota: En tu estructura, usuarios_sistema no tiene fecha_registro, así que usamos otra lógica
+    // Conteo de usuarios registrados hoy
     $stmt = $db->prepare("SELECT COUNT(*) as total FROM usuarios_sistema WHERE DATE(ultimo_acceso) = CURDATE()");
     $stmt->execute();
     $usuariosHoy = $stmt->fetchColumn();
@@ -106,7 +105,7 @@ try {
     // NUEVAS CONSULTAS ESPECÍFICAS PARA TUS TABLAS
     // ================================================================
     
-    // Obtener últimos usuarios registrados (usuarios del sistema)
+    // Obtener últimos usuarios registrados
     $stmt = $db->prepare("
         SELECT 
             id_usuario as id,
@@ -164,7 +163,7 @@ try {
     // Contar total de productos críticos
     $totalProductosCriticos = count($inventarioCritico);
     
-    // Obtener actividad reciente (usando logs_sistema)
+    // Obtener actividad reciente
     $stmt = $db->prepare("
         SELECT 
             ls.id_log as id,
@@ -184,7 +183,7 @@ try {
     $stmt->execute();
     $empleadosActividad = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Mapear estadísticas para uso fácil en el HTML
+    // Mapear estadísticas
     $stats_mapped = [
         'usuarios' => $usuariosCount,
         'franquiciados' => $franquiciadosCount,
@@ -236,25 +235,37 @@ require_once __DIR__ . '/../../includes/header.php';
 ?>
 
 <!-- =========================================================================== -->
-<!-- ESTILOS INLINE MEJORADOS -->
+<!-- ESTILOS INLINE CON PALETA CAFÉ/NARANJA/MARRÓN PIEL -->
 <!-- =========================================================================== -->
 <style>
     :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        --info-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-        --warning-gradient: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-        --danger-gradient: linear-gradient(135deg, #f85032 0%, #e73827 100%);
-        --purple-gradient: linear-gradient(135deg, #7f00ff 0%, #e100ff 100%);
-        --dark-gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
-        --glass-bg: rgba(255, 255, 255, 0.08);
-        --glass-border: rgba(255, 255, 255, 0.1);
+        /* Paleta principal café/naranja/marrón piel */
+        --cafe-oscuro: #8B4513;
+        --cafe-medio: #A0522D;
+        --cafe-claro: #D2B48C;
+        --naranja-oscuro: #FF8C00;
+        --naranja-medio: #FFA500;
+        --naranja-claro: #FFB74D;
+        --piel-oscuro: #E6BE8A;
+        --piel-medio: #F5DEB3;
+        --piel-claro: #FAEBD7;
+        --crema: #FFF8DC;
+        --marron-chocolate: #7B3F00;
+        
+        /* Gradientes con la nueva paleta */
+        --primary-gradient: linear-gradient(135deg, var(--cafe-oscuro) 0%, var(--naranja-oscuro) 100%);
+        --secondary-gradient: linear-gradient(135deg, var(--piel-oscuro) 0%, var(--naranja-claro) 100%);
+        --success-gradient: linear-gradient(135deg, #8FBC8F 0%, #3CB371 100%);
+        --info-gradient: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        --warning-gradient: linear-gradient(135deg, var(--naranja-medio) 0%, #FFD700 100%);
+        --danger-gradient: linear-gradient(135deg, #CD5C5C 0%, #B22222 100%);
+        --glass-bg: rgba(139, 69, 19, 0.08);
+        --glass-border: rgba(210, 180, 140, 0.3);
     }
 
     .dashboard-content {
         padding: 20px;
-        background: linear-gradient(135deg, #ffc497 0%, #eff6ad 100%);
+        background: linear-gradient(135deg, var(--piel-claro) 0%, var(--crema) 100%);
         min-height: calc(100vh - 70px);
         position: relative;
         overflow-x: hidden;
@@ -269,21 +280,21 @@ require_once __DIR__ . '/../../includes/header.php';
         height: 300px;
         background: var(--primary-gradient);
         z-index: 0;
-        opacity: 0.1;
+        opacity: 0.08;
     }
 
-    /* HEADER GLASSMORPHISM */
+    /* HEADER CON ESTILO CAFÉ */
     .welcome-section {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(245, 222, 179, 0.05) 100%);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid var(--glass-border);
-        color: #2d3748;
+        color: var(--marron-chocolate);
         padding: 40px;
         border-radius: 24px;
         margin-bottom: 40px;
         box-shadow:
-            0 20px 60px rgba(0, 0, 0, 0.1),
+            0 20px 60px rgba(139, 69, 19, 0.1),
             inset 0 1px 0 rgba(255, 255, 255, 0.5);
         position: relative;
         overflow: hidden;
@@ -299,7 +310,7 @@ require_once __DIR__ . '/../../includes/header.php';
         height: 200%;
         background: linear-gradient(45deg,
                 transparent 30%,
-                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 165, 0, 0.1) 50%,
                 transparent 70%);
         animation: shine 3s infinite linear;
     }
@@ -308,7 +319,6 @@ require_once __DIR__ . '/../../includes/header.php';
         0% {
             transform: translateX(-100%) translateY(-100%) rotate(45deg);
         }
-
         100% {
             transform: translateX(100%) translateY(100%) rotate(45deg);
         }
@@ -322,12 +332,14 @@ require_once __DIR__ . '/../../includes/header.php';
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         display: inline-block;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .welcome-text p {
         font-size: 1.2rem;
-        opacity: 0.8;
+        opacity: 0.9;
         font-weight: 500;
+        color: var(--cafe-medio);
     }
 
     .welcome-stats {
@@ -341,14 +353,17 @@ require_once __DIR__ . '/../../includes/header.php';
         text-align: center;
         padding: 20px;
         border-radius: 16px;
-        background: var(--glass-bg);
+        background: rgba(210, 180, 140, 0.15);
         backdrop-filter: blur(10px);
         min-width: 150px;
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(210, 180, 140, 0.3);
     }
 
     .welcome-stat:hover {
         transform: translateY(-5px);
+        background: rgba(210, 180, 140, 0.25);
+        box-shadow: 0 10px 30px rgba(139, 69, 19, 0.15);
     }
 
     .welcome-stat .number {
@@ -362,13 +377,13 @@ require_once __DIR__ . '/../../includes/header.php';
 
     .welcome-stat .label {
         font-size: 0.9rem;
-        color: #718096;
+        color: var(--cafe-medio);
         text-transform: uppercase;
         letter-spacing: 1px;
         font-weight: 600;
     }
 
-    /* CARDS DE ESTADÍSTICAS CON GLASSMORPHISM */
+    /* CARDS DE ESTADÍSTICAS */
     .dashboard-cards {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -379,14 +394,14 @@ require_once __DIR__ . '/../../includes/header.php';
     }
 
     .stat-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(250, 235, 215, 0.8) 100%);
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid var(--piel-oscuro);
         border-radius: 20px;
         padding: 30px;
         box-shadow:
-            0 10px 40px rgba(0, 0, 0, 0.08),
+            0 10px 40px rgba(139, 69, 19, 0.1),
             inset 0 1px 0 rgba(255, 255, 255, 0.6);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
@@ -402,14 +417,15 @@ require_once __DIR__ . '/../../includes/header.php';
         left: 0;
         right: 0;
         height: 4px;
-        background: var(--card-gradient);
+        background: var(--primary-gradient);
     }
 
     .stat-card:hover {
         transform: translateY(-10px) scale(1.02);
         box-shadow:
-            0 25px 60px rgba(0, 0, 0, 0.15),
+            0 25px 60px rgba(139, 69, 19, 0.2),
             inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        border-color: var(--naranja-medio);
     }
 
     .stat-card-primary::before {
@@ -432,10 +448,6 @@ require_once __DIR__ . '/../../includes/header.php';
         background: var(--danger-gradient);
     }
 
-    .stat-card-purple::before {
-        background: var(--purple-gradient);
-    }
-
     .stat-header {
         display: flex;
         justify-content: space-between;
@@ -452,8 +464,20 @@ require_once __DIR__ . '/../../includes/header.php';
         justify-content: center;
         font-size: 28px;
         color: white;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 20px rgba(139, 69, 19, 0.2);
         transition: transform 0.3s ease;
+    }
+
+    .stat-card-primary .stat-icon {
+        background: var(--primary-gradient);
+    }
+
+    .stat-card-success .stat-icon {
+        background: var(--success-gradient);
+    }
+
+    .stat-card-warning .stat-icon {
+        background: var(--warning-gradient);
     }
 
     .stat-card:hover .stat-icon {
@@ -463,7 +487,7 @@ require_once __DIR__ . '/../../includes/header.php';
     .stat-title {
         font-size: 0.95rem;
         font-weight: 700;
-        color: #718096;
+        color: var(--cafe-medio);
         text-transform: uppercase;
         letter-spacing: 1.5px;
         margin-bottom: 10px;
@@ -473,7 +497,7 @@ require_once __DIR__ . '/../../includes/header.php';
         font-size: 3.2rem;
         font-weight: 900;
         margin: 15px 0;
-        background: var(--card-gradient);
+        background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         line-height: 1;
@@ -481,7 +505,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
     .stat-progress {
         height: 8px;
-        background: rgba(0, 0, 0, 0.05);
+        background: rgba(210, 180, 140, 0.3);
         border-radius: 10px;
         overflow: hidden;
         margin: 20px 0;
@@ -491,7 +515,7 @@ require_once __DIR__ . '/../../includes/header.php';
     .stat-progress-bar {
         height: 100%;
         border-radius: 10px;
-        background: var(--card-gradient);
+        background: var(--primary-gradient);
         position: relative;
         transition: width 1s ease-in-out;
     }
@@ -514,7 +538,6 @@ require_once __DIR__ . '/../../includes/header.php';
         0% {
             transform: translateX(-100%);
         }
-
         100% {
             transform: translateX(100%);
         }
@@ -534,15 +557,16 @@ require_once __DIR__ . '/../../includes/header.php';
         background: white;
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 40px rgba(139, 69, 19, 0.08);
         transition: transform 0.3s ease;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--piel-medio);
         grid-column: span 6;
     }
 
     .grid-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 20px 60px rgba(139, 69, 19, 0.15);
+        border-color: var(--cafe-claro);
     }
 
     .grid-card.full-width {
@@ -551,8 +575,8 @@ require_once __DIR__ . '/../../includes/header.php';
 
     .card-header {
         padding: 25px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-bottom: 1px solid #e2e8f0;
+        background: linear-gradient(135deg, var(--piel-claro) 0%, var(--crema) 100%);
+        border-bottom: 1px solid var(--piel-medio);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -562,14 +586,14 @@ require_once __DIR__ . '/../../includes/header.php';
         margin: 0;
         font-size: 1.3rem;
         font-weight: 700;
-        color: #2d3748;
+        color: var(--marron-chocolate);
         display: flex;
         align-items: center;
         gap: 10px;
     }
 
     .card-header h5 i {
-        color: var(--primary-color);
+        color: var(--cafe-oscuro);
         font-size: 1.5rem;
     }
 
@@ -577,7 +601,7 @@ require_once __DIR__ . '/../../includes/header.php';
         padding: 25px;
     }
 
-    /* TARJETAS DE USUARIOS MODERNAS */
+    /* TARJETAS DE USUARIOS */
     .user-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -585,19 +609,20 @@ require_once __DIR__ . '/../../includes/header.php';
     }
 
     .user-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        background: linear-gradient(135deg, #ffffff 0%, var(--piel-claro) 100%);
         border-radius: 16px;
         padding: 25px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 8px 30px rgba(139, 69, 19, 0.05);
         transition: all 0.3s ease;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--piel-medio);
         text-align: center;
         position: relative;
     }
 
     .user-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 15px 40px rgba(139, 69, 19, 0.15);
+        border-color: var(--naranja-claro);
     }
 
     .user-avatar {
@@ -612,7 +637,7 @@ require_once __DIR__ . '/../../includes/header.php';
         font-size: 28px;
         font-weight: 700;
         margin: 0 auto 20px;
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 10px 25px rgba(139, 69, 19, 0.3);
         border: 4px solid white;
     }
 
@@ -620,7 +645,7 @@ require_once __DIR__ . '/../../includes/header.php';
         font-size: 1.1rem;
         font-weight: 700;
         margin-bottom: 10px;
-        color: #2d3748;
+        color: var(--marron-chocolate);
     }
 
     .user-role {
@@ -631,19 +656,19 @@ require_once __DIR__ . '/../../includes/header.php';
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
-        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-        color: #4f46e5;
+        background: linear-gradient(135deg, rgba(210, 180, 140, 0.3) 0%, rgba(255, 165, 0, 0.2) 100%);
+        color: var(--cafe-oscuro);
     }
 
     .user-status {
         font-size: 0.85rem;
-        color: #718096;
+        color: var(--cafe-medio);
         margin-top: 15px;
         padding-top: 15px;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--piel-medio);
     }
 
-    /* ACTIVIDAD TIMELINE MODERNA */
+    /* ACTIVIDAD TIMELINE */
     .activity-timeline {
         position: relative;
         padding-left: 40px;
@@ -656,23 +681,24 @@ require_once __DIR__ . '/../../includes/header.php';
         top: 0;
         bottom: 0;
         width: 3px;
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         border-radius: 3px;
     }
 
     .activity-item {
         position: relative;
         margin-bottom: 30px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        background: linear-gradient(135deg, #ffffff 0%, var(--piel-claro) 100%);
         border-radius: 16px;
         padding: 20px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
+        border: 1px solid var(--piel-medio);
+        box-shadow: 0 5px 20px rgba(139, 69, 19, 0.03);
         transition: transform 0.3s ease;
     }
 
     .activity-item:hover {
         transform: translateX(10px);
+        border-color: var(--cafe-claro);
     }
 
     .activity-dot {
@@ -688,25 +714,25 @@ require_once __DIR__ . '/../../includes/header.php';
     }
 
     .activity-dot-success {
-        box-shadow: 0 0 0 4px #10b981;
+        box-shadow: 0 0 0 4px #3CB371;
     }
 
     .activity-dot-primary {
-        box-shadow: 0 0 0 4px #667eea;
+        box-shadow: 0 0 0 4px var(--cafe-oscuro);
     }
 
     .activity-dot-warning {
-        box-shadow: 0 0 0 4px #f59e0b;
+        box-shadow: 0 0 0 4px var(--naranja-medio);
     }
 
     .activity-dot-danger {
-        box-shadow: 0 0 0 4px #ef4444;
+        box-shadow: 0 0 0 4px #B22222;
     }
 
     .activity-content h6 {
         font-size: 1rem;
         font-weight: 700;
-        color: #2d3748;
+        color: var(--marron-chocolate);
         margin-bottom: 10px;
         display: flex;
         align-items: center;
@@ -715,7 +741,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
     .activity-content p {
         font-size: 0.95rem;
-        color: #4b5563;
+        color: var(--cafe-medio);
         margin-bottom: 10px;
     }
 
@@ -724,67 +750,50 @@ require_once __DIR__ . '/../../includes/header.php';
         justify-content: space-between;
         align-items: center;
         font-size: 0.85rem;
-        color: #6b7280;
+        color: var(--cafe-claro);
     }
 
-    /* QUICK ACTIONS */
-    .quick-actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 20px;
-        margin-top: 30px;
+    /* BOTONES */
+    .btn-outline-primary {
+        border-color: var(--cafe-oscuro);
+        color: var(--cafe-oscuro);
     }
 
-    .quick-action-btn {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        border: 2px solid transparent;
-        border-radius: 16px;
-        padding: 25px 15px;
-        text-align: center;
-        color: #4b5563;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-        position: relative;
-        overflow: hidden;
+    .btn-outline-primary:hover {
+        background: var(--cafe-oscuro);
+        border-color: var(--cafe-oscuro);
+        color: white;
     }
 
-    .quick-action-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: var(--primary-gradient);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+    .btn-warning {
+        background: var(--warning-gradient);
+        border-color: var(--naranja-medio);
+        color: var(--marron-chocolate);
     }
 
-    .quick-action-btn:hover {
-        transform: translateY(-8px);
-        border-color: #667eea;
-        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
-        color: #4b5563;
+    .badge.bg-primary {
+        background: var(--primary-gradient) !important;
+        color: white;
     }
 
-    .quick-action-btn:hover::before {
-        opacity: 1;
+    .badge.bg-success {
+        background: var(--success-gradient) !important;
+        color: white;
     }
 
-    .quick-action-btn i {
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-        display: block;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    .badge.bg-warning {
+        background: var(--warning-gradient) !important;
+        color: var(--marron-chocolate);
     }
 
-    .quick-action-btn span {
-        font-size: 0.95rem;
-        font-weight: 600;
-        display: block;
+    .badge.bg-info {
+        background: var(--info-gradient) !important;
+        color: white;
+    }
+
+    .badge.bg-danger {
+        background: var(--danger-gradient) !important;
+        color: white;
     }
 
     /* RESPONSIVE */
@@ -819,30 +828,19 @@ require_once __DIR__ . '/../../includes/header.php';
         .user-grid {
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         }
-
-        .quick-actions {
-            grid-template-columns: repeat(2, 1fr);
-        }
     }
 
     @media (max-width: 576px) {
         .user-grid {
             grid-template-columns: 1fr;
         }
-
-        .quick-actions {
-            grid-template-columns: 1fr;
-        }
     }
 
     /* ANIMACIONES */
     @keyframes float {
-
-        0%,
-        100% {
+        0%, 100% {
             transform: translateY(0);
         }
-
         50% {
             transform: translateY(-10px);
         }
@@ -907,7 +905,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         <div class="stat-progress-bar" style="width: <?php echo min(($stats_mapped['usuarios'] ?? 0) * 5, 100); ?>%"></div>
                     </div>
                 </div>
-                <div class="stat-icon" style="background: var(--primary-gradient);">
+                <div class="stat-icon">
                     <i class="fas fa-users"></i>
                 </div>
             </div>
@@ -957,7 +955,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         <div class="stat-progress-bar" style="width: <?php echo min(($stats_mapped['productos'] ?? 0), 100); ?>%"></div>
                     </div>
                 </div>
-                <div class="stat-icon" style="background: var(--warning-gradient);">
+                <div class="stat-icon">
                     <i class="fas fa-boxes"></i>
                 </div>
             </div>
@@ -1154,17 +1152,12 @@ require_once __DIR__ . '/../../includes/header.php';
 <!-- SCRIPTS JAVASCRIPT -->
 <!-- =========================================================================== -->
 <script>
-    /**
-     * Recarga la página para actualizar la actividad
-     */
     function refreshActivity() {
-        // Mostrar indicador de carga
         const btn = event.target.closest('button');
         const originalHTML = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Actualizando...';
         btn.disabled = true;
 
-        // Recargar después de 1 segundo
         setTimeout(() => {
             location.reload();
         }, 1000);
@@ -1172,7 +1165,6 @@ require_once __DIR__ . '/../../includes/header.php';
 
     // Auto-refresh cada 10 minutos
     setTimeout(() => {
-        console.log('Auto-refresh del dashboard');
         location.reload();
     }, 10 * 60 * 1000);
 
@@ -1187,7 +1179,7 @@ require_once __DIR__ . '/../../includes/header.php';
         });
     });
 
-    // Animación de entrada para elementos
+    // Animación de entrada
     document.addEventListener('DOMContentLoaded', function() {
         const elements = document.querySelectorAll('.stat-card, .grid-card, .user-card');
         elements.forEach((element, index) => {
