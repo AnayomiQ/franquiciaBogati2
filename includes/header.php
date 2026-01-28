@@ -143,8 +143,7 @@ $user_role = strtolower(trim($user_role));
                                     <h6 class="dropdown-header text-warning">Operaciones</h6>
                                 </li>
                                 <li><a class="dropdown-item" href="productos.php"><i class="fas fa-ice-cream me-2"></i>Productos</a></li>
-                                <li><a class="dropdown-item" href="sabores.php"><i class="fas fa-blender me-2"></i>Sabores</a></li>
-                                <li><a class="dropdown-item" href="capacitaciones.php"><i class="fas fa-graduation-cap me-2"></i>Capacitaciones</a></li>
+                                <li><a class="dropdown-item" href="capacitaciones_gestion.php"><i class="fas fa-graduation-cap me-2"></i>Capacitaciones</a></li>
                                 <li><a class="dropdown-item" href="marketing.php"><i class="fas fa-bullhorn me-2"></i>Marketing</a></li>
 
                                 <li>
@@ -229,7 +228,6 @@ $user_role = strtolower(trim($user_role));
                                     <h6 class="dropdown-header text-warning">Cuenta</h6>
                                 </li>
                                 <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/empleado/horarios.php"><i class="fas fa-calendar-alt me-2"></i>Horarios</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/empleado/perfil.php"><i class="fas fa-id-card me-2"></i>Mi Perfil</a></li>
                             </ul>
                         </li>
                     <?php endif; ?>

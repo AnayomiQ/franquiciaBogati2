@@ -1,9 +1,7 @@
 <?php
-// modules/empleado/dashboard.php
-
-require_once '../../config.php';
-require_once '../../includes/functions.php';
-require_once '../../db_connection.php';
+require_once __DIR__ . '/../../config.php';      
+require_once __DIR__ . '/../../includes/functions.php';  
+require_once __DIR__ . '/../../db_connection.php';
 
 // Mostrar errores mientras depuras
 ini_set('display_errors', 1);
@@ -35,8 +33,16 @@ $userRole = getCurrentUserRole();
 $empleado_id = $_SESSION['id_empleado'] ?? null;  // Cambiado de 'empleado_id' a 'id_empleado'
 $local_codigo = $_SESSION['codigo_local'] ?? null; // Cambiado de 'local_codigo' a 'codigo_local'
 
+// Verificar si hay algún mensaje flash
+if (isset($_GET['message'])) {
+    $messageType = $_GET['message_type'] ?? 'info';
+    $message = urldecode($_GET['message']);
+    setFlashMessage($messageType, $message);
+}
+
 // Obtener conexión a la base de datos
 $db = Database::getConnection();
+
 
 // En modules/empleado/dashboard.php, actualiza la consulta de empleado:
 try {
