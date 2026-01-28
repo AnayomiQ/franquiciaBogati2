@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Eliminar usuario
         try {
             $stmt = $db->prepare("DELETE FROM usuarios_sistema WHERE id_usuario = ? AND id_usuario != ?");
-            $stmt->execute([$id, $_SESSION['usuario_id']]);
+            $stmt->execute([$id, $_SESSION['user_id']]);
             
             if ($stmt->rowCount() > 0) {
                 logAction('ELIMINAR_USUARIO', 'usuarios_sistema', "Usuario eliminado ID: $id");
@@ -201,7 +201,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                                    data-bs-target="#modalUsuario" onclick="cargarUsuario(<?php echo $usuario['id_usuario']; ?>)">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <?php if ($usuario['id_usuario'] != $_SESSION['usuario_id']): ?>
+                                                <?php if ($usuario['id_usuario'] != $_SESSION['user_id']): ?>
                                                     <button class="btn btn-sm btn-outline-danger" 
                                                             onclick="confirmarEliminar(<?php echo $usuario['id_usuario']; ?>, '<?php echo htmlspecialchars($usuario['username']); ?>')">
                                                         <i class="fas fa-trash"></i>

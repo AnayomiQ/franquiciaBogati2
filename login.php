@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         logAction('LOGIN_FALLIDO', 'Usuario inactivo: ' . $username, 'usuarios_sistema');
                     } else {
                         // Configurar sesión
-                        $_SESSION['usuario_id'] = $user['id_usuario'];
+                        $_SESSION['user_id'] = $user['id_usuario'];
                         $_SESSION['username'] = $user['username'];
                         $_SESSION['user_nombres'] = $user['nombres'] ?? ($user['nombres_franquiciado'] ?? '');
                         $_SESSION['user_apellidos'] = $user['apellidos'] ?? ($user['apellidos_franquiciado'] ?? '');
@@ -59,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['user_role'] = $user['rol'];
                         $_SESSION['is_authenticated'] = true;
                         $_SESSION['last_activity'] = time();
-
 
                         // Local del usuario
                         if (!empty($user['cedula_franquiciado'])) {
@@ -109,26 +108,26 @@ include __DIR__ . '/includes/header_public.php';
 ?>
 
 <!-- Contenedor centrado para el formulario -->
-<div class="login-container">
-    <div class="login-card">
-
+    <div class="login-container">
+        <div class="login-card">
+            
         <!-- MARCA -->
         <div class="brand-container">
             <span class="brand-text">Bogati</span>
         </div>
 
-        <!-- Título -->
-        <h2 class="login-title">Iniciar sesión</h2>
+            <!-- Título -->
+            <h2 class="login-title">Iniciar sesión</h2>
 
-        <!-- Mostrar error si existe -->
-        <?php if ($error): ?>
-            <div class="alert-custom">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
+            <!-- Mostrar error si existe -->
+            <?php if ($error): ?>
+                <div class="alert-custom">
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
 
-        <!-- Formulario -->
-        <form method="POST" action="">
+            <!-- Formulario -->
+            <form method="POST" action="">
             <!-- Escoger Rol -->
             <div class="form-group">
                 <label class="form-label">Escoger Rol</label>
@@ -140,36 +139,37 @@ include __DIR__ . '/includes/header_public.php';
                 </select>
             </div>
 
-            <!-- Usuario -->
+                <!-- Usuario -->
             <!-- Usuario o Email -->
             <div class="form-group">
                 <label class="form-label">Usuario o Email</label>
-                <input
+                <input 
                     type="text"
                     class="form-control-custom"
                     name="username"
                     placeholder="Ingrese su usuario o email"
                     value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
                     required
-                    autofocus>
+                    autofocus
+                >
                 <i class="fas fa-user input-icon"></i>
             </div>
 
-            <!-- Contraseña -->
-            <div class="form-group">
-                <label class="form-label">Contraseña</label>
-                <input type="password" class="form-control-custom" name="password" placeholder="Ingrese su contraseña" required>
-                <i class="fas fa-lock input-icon"></i>
-            </div>
+                <!-- Contraseña -->
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" class="form-control-custom" name="password" placeholder="Ingrese su contraseña" required>
+                    <i class="fas fa-lock input-icon"></i>
+                </div>
 
-            <!-- Botón -->
-            <button type="submit" class="btn-acceso">Ingresar</button>
+                <!-- Botón -->
+                <button type="submit" class="btn-acceso">Ingresar</button>
 
-            <!-- Olvidó contraseña -->
-            <div class="forgot-password">
-                <a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
-            </div>
-        </form>
+                <!-- Olvidó contraseña -->
+                <div class="forgot-password">
+                    <a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 </div>
