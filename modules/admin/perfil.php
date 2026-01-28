@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$codigo_local, $codigo_producto, $tipo_ajuste, $cantidad, 
                           $cantidad_actual, $nueva_cantidad, $motivo]);
             
-            logActividad('AJUSTAR_INVENTARIO', 'inventario', 
+            logAction('AJUSTAR_INVENTARIO', 'inventario', 
                 "Ajuste: $tipo_ajuste de $cantidad unidades de $codigo_producto en $codigo_local");
             
             setFlashMessage('success', 'Inventario ajustado exitosamente');

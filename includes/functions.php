@@ -51,9 +51,8 @@ function logout() {
     startSession();
     
     $user_id = $_SESSION['user_id'] ?? null;
-    $username = $_SESSION['username'] ?? 'Desconocido';
     
-    // Registrar cierre de sesión si hay usuario
+    // Registrar cierre de sesión
     if ($user_id) {
         try {
             $db = Database::getConnection();
@@ -539,8 +538,8 @@ function validateCedula($cedula) {
 /**
  * Formatear moneda
  */
-function formatCurrency(float $amount, string $currency = 'USD'): string {
-    return number_format($amount, 2) . ' ' . $currency;
+function formatCurrency($amount, $currency = 'USD') {
+    return '$' . number_format($amount, 2);
 }
 
 /**
@@ -560,7 +559,7 @@ function generateUniqueCode(string $prefix = '', int $length = 6): string {
 /**
  * Validar email
  */
-function isValidEmail(string $email): bool {
+function isValidEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
@@ -679,25 +678,27 @@ function isEmpleado() {
 }
 
 /**
- * Requiere que el usuario tenga un rol específico
+ * Verifica rol específico
  */
-function requireRole($role) {
+function requireRole($rolRequerido) {
     requireAuth();
     
-    if (!hasRole($role)) {
-        header('Location: ' . BASE_URL . 'unauthorized.php');
+    if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== $rolRequerido) {
+        setFlashMessage('error', 'No tienes permisos para acceder a esta sección');
+        header('Location: ' . BASE_URL . 'dashboard.php');
         exit();
     }
 }
 
 /**
- * Requiere que el usuario tenga al menos uno de los roles especificados
+ * Verificar cualquiera de varios roles
  */
-function requireAnyRole(array $roles) {
+function requireAnyRole($rolesPermitidos) {
     requireAuth();
     
-    if (!hasAnyRole($roles)) {
-        header('Location: ' . BASE_URL . 'unauthorized.php');
+    if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesPermitidos)) {
+        setFlashMessage('error', 'No tienes permisos para acceder a esta sección');
+        header('Location: ' . BASE_URL . 'dashboard.php');
         exit();
     }
 }
@@ -726,8 +727,8 @@ function logAction($accion, $detalle = '', $tabla = null, $id_registro = null) {
 /**
  * Función redirect para redirecciones
  */
-function redirect($url, $statusCode = 302) {
-    header("Location: $url", true, $statusCode);
+function redirect($url) {
+    header("Location: $url");
     exit();
 }
 

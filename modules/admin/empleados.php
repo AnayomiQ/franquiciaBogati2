@@ -11,7 +11,7 @@ $db = Database::getConnection();
 
 $action = $_GET['action'] ?? '';
 $id = $_GET['id'] ?? 0;
-$local = $_GET['local'] ?? '';
+$local_param = $_GET['local'] ?? ''; // Cambié el nombre para evitar confusión
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'crear') {
@@ -36,9 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$cedula, $nombres, $apellidos, $fecha_nacimiento, $telefono, 
                           $email, $cargo, $salario, $codigo_local, $estado]);
             
-            logActividad('CREAR_EMPLEADO', 'empleados', "Empleado creado: $cedula");
+            logAction('CREAR_EMPLEADO', "Empleado creado: $cedula", 'empleados', $db->lastInsertId());
             setFlashMessage('success', 'Empleado creado exitosamente');
-            header('Location: empleados.php' . ($local ? "?local=$local" : ''));
+            
+            // CORRECCIÓN: Usar el parámetro GET original
+            header('Location: empleados.php' . ($local_param ? "?local=$local_param" : ''));
             exit();
         } catch (PDOException $e) {
             setFlashMessage('error', 'Error al crear empleado: ' . $e->getMessage());
@@ -48,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Obtener empleados
 $empleados = [];
-$where = $local ? "WHERE e.codigo_local = ?" : "";
-$params = $local ? [$local] : [];
+$where = $local_param ? "WHERE e.codigo_local = ?" : "";
+$params = $local_param ? [$local_param] : [];
 
 try {
     $stmt = $db->prepare("
@@ -81,8 +83,9 @@ try {
 $pageTitle = APP_NAME . ' - Gestión de Empleados';
 $pageStyles = ['admin.css'];
 
-require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../includes/header.php'; 
 ?>
+
 
 <div class="container-fluid">
     <div class="row">

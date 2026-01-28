@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$cedula, $nombres, $apellidos, $telefono, $email, 
                           $fecha_nacimiento, $capital_inicial, $experiencia, $estado]);
             
-            logActividad('CREAR_FRANQUICIADO', 'franquiciados', "Franquiciado creado: $cedula");
+            logAction('CREAR_FRANQUICIADO', 'franquiciados', "Franquiciado creado: $cedula");
             setFlashMessage('success', 'Franquiciado creado exitosamente');
             header('Location: franquiciados.php');
             exit();
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$nombres, $apellidos, $telefono, $email, 
                           $fecha_nacimiento, $capital_inicial, $experiencia, $estado, $cedula_original]);
             
-            logActividad('ACTUALIZAR_FRANQUICIADO', 'franquiciados', "Franquiciado actualizado: $cedula_original");
+            logAction('ACTUALIZAR_FRANQUICIADO', 'franquiciados', "Franquiciado actualizado: $cedula_original");
             setFlashMessage('success', 'Franquiciado actualizado exitosamente');
             header('Location: franquiciados.php');
             exit();
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $db->prepare("DELETE FROM franquiciados WHERE cedula = ?");
             $stmt->execute([$cedula]);
             
-            logActividad('ELIMINAR_FRANQUICIADO', 'franquiciados', "Franquiciado eliminado: $cedula");
+            logAction('ELIMINAR_FRANQUICIADO', 'franquiciados', "Franquiciado eliminado: $cedula");
             setFlashMessage('success', 'Franquiciado eliminado exitosamente');
             header('Location: franquiciados.php');
             exit();
