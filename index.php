@@ -21,9 +21,9 @@ require_once __DIR__ . '/includes/header_public.php';
                 y convertir cada visita en una experiencia inolvidable.
             </p>
 
-           <a href="#inicio-de-todo" class="hero-btn" id="btn-conocenos">
-    Conócenos más
-</a>
+            <a href="#inicio-de-todo" class="hero-btn" id="btn-conocenos">
+                Conócenos más
+            </a>
 
         </div>
 
@@ -47,63 +47,57 @@ require_once __DIR__ . '/includes/header_public.php';
             <div class="feature-card fade-in">
                 <div class="feature-icon"><i class="fas fa-leaf"></i></div>
                 <h3>100% Natural</h3>
-                <p>Ingredientes frescos y naturales sin conservantes artificiales. Cada sabor es una explosión de autenticidad.</p>
+                <p>Ingredientes frescos y naturales sin conservantes artificiales.</p>
             </div>
 
             <div class="feature-card fade-in">
                 <div class="feature-icon"><i class="fas fa-heart"></i></div>
                 <h3>Hecho con Amor</h3>
-                <p>Preparados artesanalmente con técnicas tradicionales que respetan el producto y el proceso.</p>
+                <p>Preparados artesanalmente con técnicas tradicionales.</p>
             </div>
 
             <div class="feature-card fade-in">
                 <div class="feature-icon"><i class="fas fa-star"></i></div>
                 <h3>Calidad Premium</h3>
-                <p>Excelencia garantizada en cada bocado. Los mejores ingredientes seleccionados cuidadosamente.</p>
+                <p>Excelencia garantizada en cada bocado.</p>
             </div>
         </div>
-    </div>
-           
 
-            <div class="story-block story-highlight" id="inicio-de-todo">
-                <h3>EL INICIO DE TODO</h3>
-                <p>
-                    El <strong>16 de octubre de 2018</strong>, Santiago y Kathy abrieron el primer local
-                    en Riobamba, marcando el inicio de una empresa familiar.
-                </p>
-                <p>
-                    En la inauguración regalaron <strong>1000 helados con crema y queso</strong>,
-                    logrando que más de mil personas conocieran este postre en un solo día.
-                </p>
-                    <div class="inicio-imagen">
-        <img src="imagenes/inicio.png" alt="Primer local Bogati">
-    </div>
+        <!-- HISTORIA -->
+        <div class="story-block story-highlight" id="inicio-de-todo">
+            <h3>EL INICIO DE TODO</h3>
 
-                <p>
-                            
+            <p>
+                El <strong>16 de octubre de 2018</strong>, Santiago y Kathy abrieron el primer local
+                en Riobamba, marcando el inicio de una empresa familiar.
+            </p>
 
-            <div class="story-block">
-                <h3>HELADOS CON QUESO</h3>
-                <p>
-                    La idea siempre estuvo pensada en comidas tradicionales, aunque aún no sabían exactamente cuál.
-                </p>
-                <p>
-                    En 2017, durante un paseo familiar en <strong>Ibarra</strong>, Belén probó este postre
-                    y llamó inmediatamente a Santiago con una frase que cambiaría sus vidas:
-                </p>
+            <p>
+                En la inauguración regalaron <strong>1000 helados con crema y queso</strong>.
+            </p>
 
-                <blockquote>
-                    “Ya sé a qué nos vamos a dedicar: Helados con Queso”.
-                </blockquote>
-
-                <p>
-                    Luego de viajar a la ciudad blanca y probar el producto en familia,
-                    fue claro que habían encontrado la idea para su nuevo emprendimiento.
-                </p>
+            <div class="inicio-imagen">
+                <img src="imagenes/Inicio.png" alt="Primer local Bogati">
             </div>
+        </div>
 
+        <div class="story-block">
+            <h3>HELADOS CON QUESO</h3>
+
+            <p>
+                En 2017, durante un paseo familiar en <strong>Ibarra</strong>, Belén probó este postre
+                y dijo:
+            </p>
+
+            <blockquote>
+                “Ya sé a qué nos vamos a dedicar: Helados con Queso”.
+            </blockquote>
+
+            <p>
+                Así nació la idea que hoy es Bogati.
+            </p>
+        </div>
     </div>
-
 </section>
 
 <!-- FOOTER -->
@@ -167,17 +161,17 @@ require_once __DIR__ . '/includes/header_public.php';
     });
 </script>
 <script>
-document.getElementById("btn-conocenos").addEventListener("click", function(e) {
-    e.preventDefault();
+    document.getElementById("btn-conocenos").addEventListener("click", function(e) {
+        e.preventDefault();
 
-    const seccion = document.getElementById("inicio-de-todo");
-    seccion.classList.add("show");
+        const seccion = document.getElementById("inicio-de-todo");
+        seccion.classList.add("show");
 
-    seccion.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+        seccion.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
     });
-});
 </script>
 
 </body>
