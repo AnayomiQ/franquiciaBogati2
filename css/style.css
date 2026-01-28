@@ -2688,7 +2688,7 @@ body {
         font-size: 1rem;
     }
 }
-<style>
+
 /* Hero sofisticado */
 .banner-container {
     position: relative;
@@ -2952,6 +2952,5 @@ body {
     .accent-line {
         width: 20px;
     }
-}
-</style>
+} 
 }
