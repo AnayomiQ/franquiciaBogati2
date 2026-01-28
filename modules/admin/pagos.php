@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmt->execute([$fecha_pago, $id_pago]);
             
-            logActividad('REGISTRAR_PAGO', 'pagos_royalty', "Pago registrado ID: $id_pago");
+            logAction('REGISTRAR_PAGO', 'pagos_royalty', "Pago registrado ID: $id_pago");
             setFlashMessage('success', 'Pago registrado exitosamente');
             header('Location: pagos.php' . ($contrato ? "?contrato=$contrato" : ''));
             exit();

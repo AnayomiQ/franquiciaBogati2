@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$codigo_local, $nombre_local, $direccion, $ciudad, $provincia, 
                           $telefono, $fecha_apertura, $area_local, $cedula_franquiciado, $id_nivel]);
             
-            logActividad('CREAR_LOCAL', 'locales', "Local creado: $codigo_local");
+            logAction('CREAR_LOCAL', 'locales', "Local creado: $codigo_local");
             setFlashMessage('success', 'Local creado exitosamente');
             header('Location: locales.php');
             exit();

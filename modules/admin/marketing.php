@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             $db->commit();
-            logActividad('CREAR_CAMPANA', 'marketing_campanas', "Campaña creada: $nombre");
+            logAction('CREAR_CAMPANA', 'marketing_campanas', "Campaña creada: $nombre");
             setFlashMessage('success', 'Campaña creada exitosamente');
             header('Location: marketing.php');
             exit();

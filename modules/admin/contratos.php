@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$numero_contrato, $cedula_franquiciado, $codigo_local, $fecha_inicio, 
                           $fecha_fin, $inversion_total, $royalty, $canon_publicidad, $estado]);
             
-            logActividad('CREAR_CONTRATO', 'contratos_franquicia', "Contrato creado: $numero_contrato");
+            logAction('CREAR_CONTRATO', 'contratos_franquicia', "Contrato creado: $numero_contrato");
             setFlashMessage('success', 'Contrato creado exitosamente');
             header('Location: contratos.php');
             exit();

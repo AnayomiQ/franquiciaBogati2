@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$username, $password, $nombres, $apellidos, $email, $rol, $estado]);
             
             // Log de actividad
-            logActividad('CREAR_USUARIO', 'usuarios_sistema', "Usuario creado: $username");
+            logAction('CREAR_USUARIO', 'usuarios_sistema', "Usuario creado: $username");
             
             setFlashMessage('success', 'Usuario creado exitosamente');
             header('Location: usuarios.php');
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$password, $id_usuario]);
             }
             
-            logActividad('ACTUALIZAR_USUARIO', 'usuarios_sistema', "Usuario actualizado ID: $id_usuario");
+            logAction('ACTUALIZAR_USUARIO', 'usuarios_sistema', "Usuario actualizado ID: $id_usuario");
             
             setFlashMessage('success', 'Usuario actualizado exitosamente');
             header('Location: usuarios.php');
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$id, $_SESSION['usuario_id']]);
             
             if ($stmt->rowCount() > 0) {
-                logActividad('ELIMINAR_USUARIO', 'usuarios_sistema', "Usuario eliminado ID: $id");
+                logAction('ELIMINAR_USUARIO', 'usuarios_sistema', "Usuario eliminado ID: $id");
                 setFlashMessage('success', 'Usuario eliminado exitosamente');
             } else {
                 setFlashMessage('warning', 'No se puede eliminar su propio usuario');
@@ -138,8 +138,6 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <?php require_once __DIR__ . '/../../includes/sidebar.php'; ?>
         
         <!-- Main Content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">

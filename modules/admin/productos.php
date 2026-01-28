@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             $db->commit();
-            logActividad('CREAR_PRODUCTO', 'productos', "Producto creado: $codigo_producto");
+            logAction('CREAR_PRODUCTO', 'productos', "Producto creado: $codigo_producto");
             setFlashMessage('success', 'Producto creado exitosamente');
             header('Location: productos.php');
             exit();
