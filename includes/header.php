@@ -91,148 +91,154 @@ $user_role = strtolower(trim($user_role));
 <body>
 
     <!-- Navegación principal -->
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm fixed-top" 
-     style="background: linear-gradient(90deg, #dfb59b, #d08e5e, #f5ab61); transition: all 0.3s;">
-    <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm fixed-top"
+        style="background: linear-gradient(90deg, #dfb59b, #d08e5e, #f5ab61); transition: all 0.3s;">
+        <div class="container-fluid">
             <a class="navbar-brand" href="<?php echo BASE_URL; ?>dashboard.php">
                 <img src="<?php echo BASE_URL; ?>imagenes/Logo.png" alt="Bogati" height="80" class="me-2">
             </a>
 
             <!-- Botón para móviles -->
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
 
-        <div class="collapse navbar-collapse" id="navbarMain">
-            <!-- MENÚ IZQUIERDO -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>" 
-                       href="<?php echo BASE_URL; ?>dashboard.php">
-                       <i class="fas fa-home me-1"></i> Dashboard
-                    </a>
-                </li>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- MENÚ IZQUIERDO -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>"
+                            href="<?php echo BASE_URL; ?>dashboard.php">
+                            <i class="fas fa-home me-1"></i> Dashboard
+                        </a>
+                    </li>
 
                     <!-- ADMINISTRACIÓN -->
-                <?php if ($user_role === 'admin'): ?>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle <?php echo str_contains($_SERVER['REQUEST_URI'], 'modules/admin/') ? 'active' : ''; ?>" 
-                       href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-cogs me-1"></i> Administración
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-dark" style="background: linear-gradient(180deg, #7a5c42, #62391b);">
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'usuarios.php' ? 'active' : ''; ?>" href="usuarios.php">
-                            <i class="fas fa-users me-2"></i> Usuarios</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'franquiciados.php' ? 'active' : ''; ?>" href="franquiciados.php">
-                            <i class="fas fa-handshake me-2"></i> Franquiciados</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'locales.php' ? 'active' : ''; ?>" href="locales.php">
-                            <i class="fas fa-store me-2"></i> Locales</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'empleados.php' ? 'active' : ''; ?>" href="empleados.php">
-                            <i class="fas fa-user-tie me-2"></i> Empleados</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'productos.php' ? 'active' : ''; ?>" href="productos.php">
-                            <i class="fas fa-ice-cream me-2"></i> Productos</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'inventario.php' ? 'active' : ''; ?>" href="inventario.php">
-                            <i class="fas fa-boxes me-2"></i> Inventario</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'ventas.php' ? 'active' : ''; ?>" href="ventas.php">
-                            <i class="fas fa-chart-line me-2"></i> Ventas</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'contratos.php' ? 'active' : ''; ?>" href="contratos.php">
-                            <i class="fas fa-file-contract me-2"></i> Contratos</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'pagos.php' ? 'active' : ''; ?>" href="pagos.php">
-                            <i class="fas fa-dollar-sign me-2"></i> Pagos</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'marketing.php' ? 'active' : ''; ?>" href="marketing.php">
-                            <i class="fas fa-bullhorn me-2"></i> Marketing</a></li>
-                        <li><a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'reportes.php' ? 'active' : ''; ?>" href="reportes.php">
-                            <i class="fas fa-chart-bar me-2"></i> Reportes</a></li>
-                    </ul>
-                </li>
 
+
+
+                    <?php if ($user_role === 'admin'): ?>
+                        <!-- ================= ADMIN ================= -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-cogs me-1"></i> Administración
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-dark"
+                                style="background: linear-gradient(180deg, #7a5c42, #62391b);">
+
+                                <li>
+                                    <h6 class="dropdown-header text-warning">Socios y Expansión</h6>
+                                </li>
+                                <li><a class="dropdown-item" href="franquiciados.php"><i class="fas fa-handshake me-2"></i>Franquiciados</a></li>
+                                <li><a class="dropdown-item" href="locales.php"><i class="fas fa-store me-2"></i>Locales</a></li>
+                                <li><a class="dropdown-item" href="contratos.php"><i class="fas fa-file-contract me-2"></i>Contratos</a></li>
+
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+
+                                <li>
+                                    <h6 class="dropdown-header text-warning">Operaciones</h6>
+                                </li>
+                                <li><a class="dropdown-item" href="productos.php"><i class="fas fa-ice-cream me-2"></i>Productos</a></li>
+                                <li><a class="dropdown-item" href="sabores.php"><i class="fas fa-blender me-2"></i>Sabores</a></li>
+                                <li><a class="dropdown-item" href="capacitaciones.php"><i class="fas fa-graduation-cap me-2"></i>Capacitaciones</a></li>
+                                <li><a class="dropdown-item" href="marketing.php"><i class="fas fa-bullhorn me-2"></i>Marketing</a></li>
+
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+
+                                <li>
+                                    <h6 class="dropdown-header text-warning">Control</h6>
+                                </li>
+                                <li><a class="dropdown-item" href="pagos_royalty.php"><i class="fas fa-money-check-alt me-2"></i>Royalties</a></li>
+                                <li><a class="dropdown-item" href="usuarios.php"><i class="fas fa-user-shield me-2"></i>Usuarios</a></li>
+                            </ul>
+                        </li>
 
                     <?php elseif ($user_role === 'franquiciado'): ?>
-                        <!-- FRANQUICIADO -->
+                        <!-- ================= FRANQUICIADO ================= -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle <?php echo str_contains($_SERVER['REQUEST_URI'], 'pages/franquiciado/') ? 'active' : ''; ?>"
-                                href="#" data-bs-toggle="dropdown">
-                                <i class="fas fa-store me-1"></i> Mis Locales
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-store me-1"></i> Franquiciado
                             </a>
-                            <ul class="dropdown-menu">
+
+                            <ul class="dropdown-menu dropdown-menu-dark"
+                                style="background: linear-gradient(180deg, #7a5c42, #62391b);">
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'locales.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/franquiciado/locales.php">
-                                        <i class="fas fa-store-alt me-2"></i>Mis Locales
-                                    </a>
+                                    <h6 class="dropdown-header text-warning">Mi Negocio</h6>
                                 </li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/locales.php"><i class="fas fa-store-alt me-2"></i>Mis Locales</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/ventas.php"><i class="fas fa-chart-line me-2"></i>Ventas</a></li>
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'ventas.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/franquiciado/ventas.php">
-                                        <i class="fas fa-chart-line me-2"></i>Ventas
-                                    </a>
+                                    <hr class="dropdown-divider">
                                 </li>
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'contratos.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/franquiciado/contratos.php">
-                                        <i class="fas fa-file-signature me-2"></i>Contratos
-                                    </a>
+                                    <h6 class="dropdown-header text-warning">Administración</h6>
                                 </li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/contratos.php"><i class="fas fa-file-signature me-2"></i>Contratos</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/pagos.php"><i class="fas fa-credit-card me-2"></i>Pagos</a></li>
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'pagos.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/franquiciado/pagos.php">
-                                        <i class="fas fa-credit-card me-2"></i>Pagos
-                                    </a>
+                                    <hr class="dropdown-divider">
                                 </li>
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'empleados.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/franquiciado/empleados.php">
-                                        <i class="fas fa-users me-2"></i>Empleados
-                                    </a>
+                                    <h6 class="dropdown-header text-warning">Personal</h6>
                                 </li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/franquiciado/empleados.php"><i class="fas fa-users me-2"></i>Empleados</a></li>
                             </ul>
                         </li>
 
                     <?php elseif ($user_role === 'empleado'): ?>
-                        <!-- EMPLEADO -->
+                        <!-- ================= EMPLEADO ================= -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle <?php echo str_contains($_SERVER['REQUEST_URI'], 'pages/empleado/') ? 'active' : ''; ?>"
-                                href="#" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-tie me-1"></i> Operaciones
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-tie me-1"></i> Empleado
                             </a>
-                            <ul class="dropdown-menu">
+
+                            <ul class="dropdown-menu dropdown-menu-dark"
+                                style="background: linear-gradient(180deg, #7a5c42, #62391b);">
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'ventas.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/empleado/ventas.php">
-                                        <i class="fas fa-shopping-cart me-2"></i>Ventas
-                                    </a>
+                                    <h6 class="dropdown-header text-warning">Operación</h6>
                                 </li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/ventas.php"><i class="fas fa-shopping-cart me-2"></i>Ventas</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/inventario.php"><i class="fas fa-box me-2"></i>Inventario</a></li>
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'inventario.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/empleado/inventario.php">
-                                        <i class="fas fa-box me-2"></i>Inventario
-                                    </a>
+                                    <hr class="dropdown-divider">
                                 </li>
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'capacitaciones.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/empleado/capacitaciones.php">
-                                        <i class="fas fa-book me-2"></i>Capacitaciones
-                                    </a>
+                                    <h6 class="dropdown-header text-warning">Formación</h6>
                                 </li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/capacitaciones.php"><i class="fas fa-book me-2"></i>Capacitaciones</a></li>
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'horarios.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/empleado/horarios.php">
-                                        <i class="fas fa-calendar-alt me-2"></i>Horarios
-                                    </a>
+                                    <hr class="dropdown-divider">
                                 </li>
+
                                 <li>
-                                    <a class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) == 'perfil.php' ? 'active' : ''; ?>"
-                                        href="<?php echo BASE_URL; ?>pages/empleado/perfil.php">
-                                        <i class="fas fa-id-card me-2"></i>Mi Perfil
-                                    </a>
+                                    <h6 class="dropdown-header text-warning">Cuenta</h6>
                                 </li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/horarios.php"><i class="fas fa-calendar-alt me-2"></i>Horarios</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>pages/empleado/perfil.php"><i class="fas fa-id-card me-2"></i>Mi Perfil</a></li>
                             </ul>
                         </li>
                     <?php endif; ?>
+
                 </ul>
 
-<!-- Menú de usuario (derecha) -->
+
+
+                <!-- Menú de usuario (derecha) -->
                 <ul class="navbar-nav ms-auto align-items-center">
                     <!-- Notificaciones -->
                     <?php
@@ -268,7 +274,9 @@ $user_role = strtolower(trim($user_role));
                             <?php else: ?>
                                 <li><a class="dropdown-item text-muted" href="#">No hay notificaciones</a></li>
                             <?php endif; ?>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item text-center small text-warning" href="<?php echo BASE_URL; ?>modules/notificaciones.php">Ver todas</a></li>
                         </ul>
                     </li>

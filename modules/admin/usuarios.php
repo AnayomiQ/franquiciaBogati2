@@ -155,6 +155,44 @@ require_once __DIR__ . '/../../includes/header.php';
             <!-- Mensajes Flash -->
             <?php displayFlashMessage(); ?>
 
+            <!-- Filtros -->
+<div class="card mb-3 shadow-sm">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <input type="text" id="filtroTexto" class="form-control"
+                       placeholder="Buscar usuario, nombre o email">
+            </div>
+
+            <div class="col-md-3">
+                <select id="filtroRol" class="form-select">
+                    <option value="">Todos los roles</option>
+                    <option value="ADMIN">Administrador</option>
+                    <option value="GERENTE">Gerente</option>
+                    <option value="EMPLEADO">Empleado</option>
+                    <option value="FRANQUICIADO">Franquiciado</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select id="filtroEstado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="ACTIVO">Activo</option>
+                    <option value="INACTIVO">Inactivo</option>
+                    <option value="SUSPENDIDO">Suspendido</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-outline-secondary" onclick="limpiarFiltros()">
+                    Limpiar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
             <!-- Tabla de Usuarios -->
             <div class="card">
                 <div class="card-body">
@@ -320,6 +358,38 @@ function cargarUsuario(id) {
         })
         .catch(error => console.error('Error:', error));
 }
+
+function filtrarUsuarios() {
+    const texto = document.getElementById('filtroTexto').value.toLowerCase();
+    const rol = document.getElementById('filtroRol').value;
+    const estado = document.getElementById('filtroEstado').value;
+
+    document.querySelectorAll('#tablaUsuarios tbody tr').forEach(fila => {
+        const contenido = fila.innerText.toLowerCase();
+        const rolFila = fila.children[4].innerText.trim();
+        const estadoFila = fila.children[5].innerText.trim();
+
+        let visible = true;
+
+        if (texto && !contenido.includes(texto)) visible = false;
+        if (rol && rol !== rolFila) visible = false;
+        if (estado && estado !== estadoFila) visible = false;
+
+        fila.style.display = visible ? '' : 'none';
+    });
+}
+
+document.getElementById('filtroTexto').addEventListener('keyup', filtrarUsuarios);
+document.getElementById('filtroRol').addEventListener('change', filtrarUsuarios);
+document.getElementById('filtroEstado').addEventListener('change', filtrarUsuarios);
+
+function limpiarFiltros() {
+    document.getElementById('filtroTexto').value = '';
+    document.getElementById('filtroRol').value = '';
+    document.getElementById('filtroEstado').value = '';
+    filtrarUsuarios();
+}
+
 
 // Función para confirmar eliminación
 function confirmarEliminar(id, username) {
